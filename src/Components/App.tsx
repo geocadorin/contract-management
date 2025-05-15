@@ -1,46 +1,50 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '../SuperbaseConfig/supabaseClient';
+import { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './AuthProvider';
+import Login from './Login';
+import CityList from './CityList';
 
-type City = {
-  id: number;
-  name: string;
-};
-
-function App() {
-  const [cities, setCities] = useState<City[]>([]);
+// Componente protegido que verifica autenticação
+const ProtectedApp = () => {
+  const { session, loading } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    async function fetchCities() {
-      const { data, error } = await supabase.from('cities').select('*');
-      if (error) {
-        console.error('Erro ao buscar cidades:', error);
-      } else {
-        setCities(data || []);
-      }
-    }
-    fetchCities();
-  }, []);
+    setIsAuthenticated(!!session);
+  }, [session]);
 
+  // Função para lidar com login bem-sucedido
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  // Função para lidar com logout
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
+  // Exibir indicador de carregamento enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <p className="text-gray-600">Carregando...</p>
+      </div>
+    );
+  }
+
+  // Renderizar componente de login ou lista de cidades com base no estado de autenticação
+  return isAuthenticated ? (
+    <CityList onLogout={handleLogout} />
+  ) : (
+    <Login onLogin={handleLogin} />
+  );
+};
+
+// Componente principal que envolve a aplicação com o provedor de autenticação
+function App() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Cidades</h1>
-      <table className="w-full border">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border px-4 py-2">ID</th>
-            <th className="border px-4 py-2">Nome</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cities.map((city) => (
-            <tr key={city.id}>
-              <td className="border px-4 py-2">{city.id}</td>
-              <td className="border px-4 py-2">{city.name}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <AuthProvider>
+      <ProtectedApp />
+    </AuthProvider>
   );
 }
 
