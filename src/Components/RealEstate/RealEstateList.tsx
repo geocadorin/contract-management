@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { RealEstate } from '../../interfaces/RealEstate';
 import { realEstateService } from '../../services/realEstateService';
-import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight, FiHome } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight, FiHome, FiDownload } from 'react-icons/fi';
+import { exportToExcel, formatRealEstatesForExport } from '../../Utilities/excelExporter';
 
 const RealEstateList = () => {
   const [realEstates, setRealEstates] = useState<RealEstate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
   
   // Estados para filtros
   const [addressFilter, setAddressFilter] = useState<string>('');
@@ -105,6 +107,21 @@ const RealEstateList = () => {
     return 'Informação não disponível';
   };
   
+  // Exportar para Excel
+  const handleExportToExcel = () => {
+    try {
+      setExportLoading(true);
+      // Exportar todos os imóveis filtrados (ignorando paginação)
+      const formattedData = formatRealEstatesForExport(filteredRealEstates);
+      exportToExcel(formattedData, 'imoveis', 'Imóveis');
+    } catch (error) {
+      console.error('Erro ao exportar para Excel:', error);
+      setError('Erro ao exportar para Excel. Por favor, tente novamente.');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -117,12 +134,28 @@ const RealEstateList = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Imóveis</h1>
-        <Link 
-          to="/real-estates/new" 
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
-        >
-          <FiPlus className="mr-2" /> Novo Imóvel
-        </Link>
+        <div className="flex space-x-2">
+          <button
+            onClick={handleExportToExcel}
+            disabled={exportLoading || filteredRealEstates.length === 0}
+            className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${
+              (exportLoading || filteredRealEstates.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {exportLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            ) : (
+              <FiDownload className="mr-2" />
+            )}
+            Exportar Excel
+          </button>
+          <Link 
+            to="/real-estates/new" 
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
+          >
+            <FiPlus className="mr-2" /> Novo Imóvel
+          </Link>
+        </div>
       </div>
       
       {/* Mensagem de erro */}

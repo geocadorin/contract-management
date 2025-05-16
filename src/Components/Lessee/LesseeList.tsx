@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Lessee } from '../../interfaces/Person';
 import { lesseeService } from '../../services/personService';
-import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight, FiDownload } from 'react-icons/fi';
+import { exportToExcel, formatLesseesForExport } from '../../Utilities/excelExporter';
 
 const LesseeList = () => {
   const [lessees, setLessees] = useState<Lessee[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
   
   // Estados para filtros
   const [nameFilter, setNameFilter] = useState<string>('');
@@ -83,6 +85,21 @@ const LesseeList = () => {
     }
   };
   
+  // Exportar para Excel
+  const handleExportToExcel = () => {
+    try {
+      setExportLoading(true);
+      // Exportar todos os inquilinos filtrados (ignorando paginação)
+      const formattedData = formatLesseesForExport(filteredLessees);
+      exportToExcel(formattedData, 'inquilinos', 'Inquilinos');
+    } catch (error) {
+      console.error('Erro ao exportar para Excel:', error);
+      setError('Erro ao exportar para Excel. Por favor, tente novamente.');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -95,12 +112,28 @@ const LesseeList = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Inquilinos</h1>
-        <Link 
-          to="/lessees/new" 
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
-        >
-          <FiPlus className="mr-2" /> Novo Inquilino
-        </Link>
+        <div className="flex space-x-2">
+          <button
+            onClick={handleExportToExcel}
+            disabled={exportLoading || filteredLessees.length === 0}
+            className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${
+              (exportLoading || filteredLessees.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {exportLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            ) : (
+              <FiDownload className="mr-2" />
+            )}
+            Exportar Excel
+          </button>
+          <Link 
+            to="/lessees/new" 
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
+          >
+            <FiPlus className="mr-2" /> Novo Inquilino
+          </Link>
+        </div>
       </div>
       
       {/* Mensagem de erro */}

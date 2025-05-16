@@ -20,6 +20,9 @@ const electronHandler = {
       ipcRenderer.once(channel, (_event, ...args) => func(...args))
     },
   },
+  saveFile: (buffer: ArrayBuffer, defaultPath: string, filters?: Array<{name: string, extensions: string[]}>) => {
+    return ipcRenderer.invoke('save-file', { buffer, defaultPath, filters })
+  }
 }
 
 contextBridge.exposeInMainWorld('electron', electronHandler)

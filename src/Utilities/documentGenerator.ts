@@ -231,9 +231,33 @@ export const generateOwnerDocx = async (owner: Owner) => {
   });
 
   // Gera o arquivo
-  const buffer = await Packer.toBuffer(doc);
-  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-  saveAs(blob, `proprietario_${owner.full_name.replace(/\s+/g, '_')}.docx`);
+  // Especificando o formato "blob" para compatibilidade entre plataformas
+  const blob = await Packer.toBlob(doc);
+  const filename = `proprietario_${owner.full_name.replace(/\s+/g, '_')}.docx`;
+  
+  // Verifica se estamos no ambiente Electron
+  if (window.electron && window.electron.saveFile) {
+    try {
+      // Converter blob para ArrayBuffer
+      const arrayBuffer = await blob.arrayBuffer();
+      
+      const result = await window.electron.saveFile(
+        arrayBuffer, 
+        filename,
+        [{ name: 'Documentos Word', extensions: ['docx'] }]
+      );
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Falha ao salvar o arquivo');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar arquivo DOCX:', error);
+      throw error;
+    }
+  } else {
+    // Método padrão para navegador - usa blob diretamente
+    saveAs(blob, filename);
+  }
 };
 
 // EXPORTAÇÃO PARA INQUILINOS (LESSEES)
@@ -414,9 +438,33 @@ export const generateLesseeDocx = async (lessee: Lessee) => {
   });
 
   // Gera o arquivo
-  const buffer = await Packer.toBuffer(doc);
-  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-  saveAs(blob, `inquilino_${lessee.full_name.replace(/\s+/g, '_')}.docx`);
+  // Especificando o formato "blob" para compatibilidade entre plataformas
+  const blob = await Packer.toBlob(doc);
+  const filename = `inquilino_${lessee.full_name.replace(/\s+/g, '_')}.docx`;
+  
+  // Verifica se estamos no ambiente Electron
+  if (window.electron && window.electron.saveFile) {
+    try {
+      // Converter blob para ArrayBuffer
+      const arrayBuffer = await blob.arrayBuffer();
+      
+      const result = await window.electron.saveFile(
+        arrayBuffer, 
+        filename,
+        [{ name: 'Documentos Word', extensions: ['docx'] }]
+      );
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Falha ao salvar o arquivo');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar arquivo DOCX:', error);
+      throw error;
+    }
+  } else {
+    // Método padrão para navegador - usa blob diretamente
+    saveAs(blob, filename);
+  }
 };
 
 // EXPORTAÇÃO PARA IMÓVEIS (REAL ESTATES)
@@ -666,9 +714,33 @@ export const generateRealEstateDocx = async (realEstate: RealEstate) => {
   });
 
   // Gera o arquivo
-  const buffer = await Packer.toBuffer(doc);
-  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-  saveAs(blob, `imovel_${realEstate.street?.replace(/\s+/g, '_') || 'sem_endereco'}_${realEstate.number || ''}.docx`);
+  // Especificando o formato "blob" para compatibilidade entre plataformas
+  const blob = await Packer.toBlob(doc);
+  const filename = `imovel_${realEstate.id}.docx`;
+  
+  // Verifica se estamos no ambiente Electron
+  if (window.electron && window.electron.saveFile) {
+    try {
+      // Converter blob para ArrayBuffer
+      const arrayBuffer = await blob.arrayBuffer();
+      
+      const result = await window.electron.saveFile(
+        arrayBuffer, 
+        filename,
+        [{ name: 'Documentos Word', extensions: ['docx'] }]
+      );
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Falha ao salvar o arquivo');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar arquivo DOCX:', error);
+      throw error;
+    }
+  } else {
+    // Método padrão para navegador - usa blob diretamente
+    saveAs(blob, filename);
+  }
 };
 
 // EXPORTAÇÃO PARA CONTRATOS
@@ -940,7 +1012,31 @@ export const generateContractDocx = async (contract: Contract) => {
   });
 
   // Gera o arquivo
-  const buffer = await Packer.toBuffer(doc);
-  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-  saveAs(blob, `contrato_${contract.identifier.replace(/\s+/g, '_')}.docx`);
+  // Especificando o formato "blob" para compatibilidade entre plataformas
+  const blob = await Packer.toBlob(doc);
+  const filename = `contrato_${contract.id}.docx`;
+  
+  // Verifica se estamos no ambiente Electron
+  if (window.electron && window.electron.saveFile) {
+    try {
+      // Converter blob para ArrayBuffer
+      const arrayBuffer = await blob.arrayBuffer();
+      
+      const result = await window.electron.saveFile(
+        arrayBuffer, 
+        filename,
+        [{ name: 'Documentos Word', extensions: ['docx'] }]
+      );
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Falha ao salvar o arquivo');
+      }
+    } catch (error) {
+      console.error('Erro ao salvar arquivo DOCX:', error);
+      throw error;
+    }
+  } else {
+    // Método padrão para navegador - usa blob diretamente
+    saveAs(blob, filename);
+  }
 }; 

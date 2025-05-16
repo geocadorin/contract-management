@@ -1,7 +1,8 @@
-import { app, BrowserWindow, shell, ipcMain, nativeTheme } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, nativeTheme, dialog } from 'electron'
 import { release } from 'node:os'
 import { join } from 'node:path'
 import { addProtocols } from './protocols'
+import * as fs from 'node:fs'
 
 
 // The built directory structure
@@ -59,11 +60,11 @@ async function createWindow() {
     // electron-vite-vue#298
     win.loadURL(url)
     // Open devTool if the app is not packaged
-    win.webContents.openDevTools()
+    // win.webContents.openDevTools()
   } else {
     win.loadFile(indexHtml)
     // Adicionar esta linha para abrir DevTools na versão em produção também
-    win.webContents.openDevTools()
+    // win.webContents.openDevTools()
   }
 
   // Make all links open with the browser, not with the application
@@ -83,6 +84,35 @@ app.whenReady().then(() => {
     const requestedTheme = (args as string[])[0] === 'dark'
     nativeTheme.themeSource = requestedTheme ? 'dark' : 'light'
   })
+  
+  // Handler para salvar arquivos
+  ipcMain.handle('save-file', async (_, args) => {
+    try {
+      const { buffer, defaultPath, filters } = args;
+      
+      // Abrir diálogo para escolher onde salvar
+      const { canceled, filePath } = await dialog.showSaveDialog({
+        defaultPath,
+        filters: filters || [
+          { name: 'Documentos', extensions: ['docx', 'pdf'] },
+        ]
+      });
+      
+      if (!canceled && filePath) {
+        // Converter o buffer para Uint8Array
+        const bufferData = Buffer.from(buffer);
+        // Salvar o arquivo
+        fs.writeFileSync(filePath, bufferData);
+        return { success: true, filePath };
+      }
+      
+      return { success: false, reason: 'cancelled' };
+    } catch (error: any) {
+      console.error('Erro ao salvar arquivo:', error);
+      return { success: false, reason: 'error', message: error.message || 'Erro desconhecido' };
+    }
+  });
+  
   createWindow()
 
   if (win) win.menuBarVisible = false

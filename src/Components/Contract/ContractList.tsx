@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Contract, ContractKind } from '../../interfaces/Contract';
 import { contractService } from '../../services/contractService';
-import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight, FiFileText } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight, FiFileText, FiDownload } from 'react-icons/fi';
+import { exportToExcel, formatContractsForExport } from '../../Utilities/excelExporter';
 
 const ContractList = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
   
   // Estados para filtros
   const [identifierFilter, setIdentifierFilter] = useState<string>('');
@@ -147,6 +149,21 @@ const ContractList = () => {
     return `${contract.real_estates.street || ''}, ${contract.real_estates.number || ''}${contract.real_estates.complement ? `, ${contract.real_estates.complement}` : ''}, ${contract.real_estates.neighborhood || ''}`;
   };
   
+  // Exportar para Excel
+  const handleExportToExcel = () => {
+    try {
+      setExportLoading(true);
+      // Exportar todos os contratos filtrados (ignorando paginação)
+      const formattedData = formatContractsForExport(filteredContracts);
+      exportToExcel(formattedData, 'contratos', 'Contratos');
+    } catch (error) {
+      console.error('Erro ao exportar para Excel:', error);
+      setError('Erro ao exportar para Excel. Por favor, tente novamente.');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -163,8 +180,22 @@ const ContractList = () => {
             <h1 className="text-2xl font-bold text-primary mb-4 md:mb-0">Contratos</h1>
             
             <div className="flex flex-wrap items-center gap-2">
-              <Link
-                to="/contracts/new"
+              <button
+                onClick={handleExportToExcel}
+                disabled={exportLoading || filteredContracts.length === 0}
+                className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${
+                  (exportLoading || filteredContracts.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {exportLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                ) : (
+                  <FiDownload className="mr-2" />
+                )}
+                Exportar Excel
+              </button>
+              <Link 
+                to="/contracts/new" 
                 className="bg-accent hover:bg-accent-dark text-white font-medium py-2 px-4 rounded-md flex items-center"
               >
                 <FiPlus className="mr-2" /> Novo Contrato

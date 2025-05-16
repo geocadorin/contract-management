@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Owner } from '../../interfaces/Person';
 import { ownerService } from '../../services/personService';
-import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight, FiDownload } from 'react-icons/fi';
+import { exportToExcel, formatOwnersForExport } from '../../Utilities/excelExporter';
 
 const OwnerList = () => {
   const [owners, setOwners] = useState<Owner[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
   
   // Estados para filtros
   const [nameFilter, setNameFilter] = useState<string>('');
@@ -83,6 +85,21 @@ const OwnerList = () => {
     }
   };
   
+  // Exportar para Excel
+  const handleExportToExcel = () => {
+    try {
+      setExportLoading(true);
+      // Exportar todos os proprietários filtrados (ignorando paginação)
+      const formattedData = formatOwnersForExport(filteredOwners);
+      exportToExcel(formattedData, 'proprietarios', 'Proprietários');
+    } catch (error) {
+      console.error('Erro ao exportar para Excel:', error);
+      setError('Erro ao exportar para Excel. Por favor, tente novamente.');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -95,12 +112,28 @@ const OwnerList = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Proprietários</h1>
-        <Link 
-          to="/owners/new" 
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
-        >
-          <FiPlus className="mr-2" /> Novo Proprietário
-        </Link>
+        <div className="flex space-x-2">
+          <button
+            onClick={handleExportToExcel}
+            disabled={exportLoading || filteredOwners.length === 0}
+            className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${
+              (exportLoading || filteredOwners.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {exportLoading ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            ) : (
+              <FiDownload className="mr-2" />
+            )}
+            Exportar Excel
+          </button>
+          <Link 
+            to="/owners/new" 
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
+          >
+            <FiPlus className="mr-2" /> Novo Proprietário
+          </Link>
+        </div>
       </div>
       
       {/* Mensagem de erro */}
