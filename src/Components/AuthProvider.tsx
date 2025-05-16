@@ -5,11 +5,13 @@ import { supabase } from '../SuperbaseConfig/supabaseClient';
 type AuthContextType = {
     session: Session | null;
     loading: boolean;
+    supabase: typeof supabase;
 };
 
 const AuthContext = createContext<AuthContextType>({
     session: null,
     loading: true,
+    supabase
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -56,7 +58,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ session, loading }}>
+        <AuthContext.Provider value={{ session, loading, supabase }}>
             {children}
         </AuthContext.Provider>
     );

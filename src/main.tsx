@@ -4,7 +4,6 @@ import App from 'Components/App'
 import './index.css'
 import { firstRun } from './Utilities/theme'
 
-
 const themeSetter = (e: Event) => {
   firstRun()
   window.removeEventListener('DOMContentLoaded', themeSetter)
