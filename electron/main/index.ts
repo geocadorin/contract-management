@@ -44,7 +44,7 @@ const indexHtml = join(process.env.DIST, 'index.html')
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: 'Main window',
+    title: 'Sogrinha - Gestão de Contratos',
     icon: join(process.env.PUBLIC, 'favicon.ico'),
     width: 1920,
     height: 1080,

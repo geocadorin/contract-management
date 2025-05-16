@@ -4,7 +4,10 @@ import { Lessee, PersonPartner, MaritalStatus, City } from '../../interfaces/Per
 import { lesseeService, personService } from '../../services/personService';
 import { locationService } from '../../services/locationService';
 import { FiEdit, FiArrowLeft, FiUser, FiHome, FiPhone, FiMail, FiFile } from 'react-icons/fi';
+import { SiAdobeacrobatreader } from 'react-icons/si';
+import { BsFiletypeDocx } from 'react-icons/bs';
 import PartnerList from '../Common/PartnerList';
+import { generateLesseePdf, generateLesseeDocx } from '../../Utilities/documentGenerator';
 
 const LesseeDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +18,7 @@ const LesseeDetails = () => {
   const [city, setCity] = useState<City | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [exportLoading, setExportLoading] = useState<{pdf: boolean, docx: boolean}>({pdf: false, docx: false});
   
   useEffect(() => {
     const fetchLesseeDetails = async () => {
@@ -107,16 +111,68 @@ const LesseeDetails = () => {
     return cep.replace(/(\d{5})(\d{3})/, '$1-$2');
   };
   
+  const handleExportPdf = () => {
+    if (!lessee) return;
+    setExportLoading(prev => ({...prev, pdf: true}));
+    try {
+      generateLesseePdf(lessee);
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      alert('Erro ao gerar o PDF. Por favor, tente novamente.');
+    } finally {
+      setExportLoading(prev => ({...prev, pdf: false}));
+    }
+  };
+
+  const handleExportDocx = () => {
+    if (!lessee) return;
+    setExportLoading(prev => ({...prev, docx: true}));
+    try {
+      generateLesseeDocx(lessee);
+    } catch (error) {
+      console.error('Erro ao gerar DOCX:', error);
+      alert('Erro ao gerar o documento DOCX. Por favor, tente novamente.');
+    } finally {
+      setExportLoading(prev => ({...prev, docx: false}));
+    }
+  };
+  
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Detalhes do Inquilino</h1>
-        <Link 
-          to={`/lessees/${id}/edit`} 
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
-        >
-          <FiEdit className="mr-2" /> Editar
-        </Link>
+        <div className="flex space-x-2">
+          <button
+            onClick={handleExportPdf}
+            disabled={exportLoading.pdf}
+            className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md flex items-center"
+          >
+            {exportLoading.pdf ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            ) : (
+              <SiAdobeacrobatreader className="mr-2" />
+            )}
+            Exportar PDF
+          </button>
+          <button
+            onClick={handleExportDocx}
+            disabled={exportLoading.docx}
+            className="bg-blue-700 hover:bg-blue-800 text-white py-2 px-4 rounded-md flex items-center"
+          >
+            {exportLoading.docx ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            ) : (
+              <BsFiletypeDocx className="mr-2" />
+            )}
+            Exportar DOCX
+          </button>
+          <Link 
+            to={`/lessees/${id}/edit`} 
+            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
+          >
+            <FiEdit className="mr-2" /> Editar
+          </Link>
+        </div>
       </div>
       
       <div className="bg-white shadow-md rounded-lg p-6">

@@ -2,7 +2,8 @@
  * @see https://www.electron.build/configuration/configuration
  */
 {
-  "appId": "YourAppID",
+  "appId": "com.sogrinha.contract-management",
+  "productName": "Sogrinha - Gestão de Contratos",
   "asar": true,
   "directories": {
     "output": "release/${version}"
