@@ -6,6 +6,11 @@ body {
   @apply dark:bg-slate-800 dark:text-white text-black bg-white;
 }
 
+/* Garantir que inputs e selects sempre tenham texto escuro */
+input, select, textarea, option {
+  @apply text-gray-800 !important;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     @apply bg-slate-800 text-white;

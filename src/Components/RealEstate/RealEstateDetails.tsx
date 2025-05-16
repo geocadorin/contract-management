@@ -76,29 +76,15 @@ const RealEstateDetails = () => {
   }
   
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Detalhes do Imóvel</h1>
-        <div className="flex space-x-2">
-          <Link 
-            to="/real-estates" 
-            className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md flex items-center"
-          >
-            <FiArrowLeft className="mr-2" /> Voltar
-          </Link>
-          <Link 
-            to={`/real-estates/${id}/edit`} 
-            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
-          >
-            <FiEdit className="mr-2" /> Editar
-          </Link>
-          <button 
-            onClick={handleDelete}
-            className="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-md flex items-center"
-          >
-            <FiTrash2 className="mr-2" /> Excluir
-          </button>
-        </div>
+        <Link 
+          to={`/real-estates/${id}/edit`} 
+          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
+        >
+          <FiEdit className="mr-2" /> Editar
+        </Link>
       </div>
       
       <div className="bg-white shadow-md rounded-lg overflow-hidden mb-6">

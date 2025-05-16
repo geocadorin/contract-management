@@ -248,17 +248,11 @@ const LesseeForm = () => {
   }
   
   return (
-    <div className="p-4">
+    <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           {isEditMode ? 'Editar Inquilino' : 'Novo Inquilino'}
         </h1>
-        <button
-          onClick={() => navigate('/lessees')}
-          className="flex items-center text-gray-600 hover:text-gray-900"
-        >
-          <FiArrowLeft className="mr-2" /> Voltar para a lista
-        </button>
       </div>
       
       {/* Mensagem de erro */}

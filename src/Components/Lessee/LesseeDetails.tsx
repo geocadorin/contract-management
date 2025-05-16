@@ -108,23 +108,15 @@ const LesseeDetails = () => {
   };
   
   return (
-    <div className="p-4">
+    <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Detalhes do Inquilino</h1>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => navigate('/lessees')}
-            className="flex items-center text-gray-600 hover:text-gray-900"
-          >
-            <FiArrowLeft className="mr-2" /> Voltar para a lista
-          </button>
-          <Link
-            to={`/lessees/${id}/edit`}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md flex items-center"
-          >
-            <FiEdit className="mr-2" /> Editar
-          </Link>
-        </div>
+        <Link 
+          to={`/lessees/${id}/edit`} 
+          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
+        >
+          <FiEdit className="mr-2" /> Editar
+        </Link>
       </div>
       
       <div className="bg-white shadow-md rounded-lg p-6">

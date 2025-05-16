@@ -5,41 +5,31 @@ export const realEstateService = {
   // Listar todos os imóveis
   async getAll(): Promise<RealEstate[]> {
     try {
-      // Tentar primeiro com alguns relacionamentos básicos
-      try {
-        const { data, error } = await supabase
-          .from('real_estates')
-          .select(`
-            *,
-            cities (*),
-            owners:persons (id, full_name)
-          `)
-          .order('created_at', { ascending: false });
-        
-        if (error) {
-          throw error;
-        }
-        
-        return data || [];
-      } catch (joinError) {
-        console.error('Erro ao buscar imóveis com joins:', joinError);
-        
-        // Se falhar, tentar consulta simples sem relacionamentos
-        const { data, error } = await supabase
-          .from('real_estates')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (error) {
-          console.error('Erro mesmo na consulta simples:', error);
-          throw error;
-        }
-        
-        return data || [];
+      console.log('Iniciando busca simplificada de imóveis...');
+      
+      // Consulta simplificada sem joins para garantir que todos os imóveis sejam recuperados
+      const { data, error } = await supabase
+        .from('real_estates')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Erro na consulta de imóveis:', error);
+        throw error;
       }
+      
+      console.log(`Recuperados ${data?.length || 0} imóveis básicos`);
+      
+      // Imprimir os primeiros imóveis para depuração
+      if (data && data.length > 0) {
+        console.log('Primeiro imóvel recuperado:', JSON.stringify(data[0], null, 2));
+        console.log('Status dos imóveis:', data.map(re => re.status_real_estate));
+      }
+      
+      return data || [];
     } catch (err) {
       console.error('Exceção ao buscar imóveis:', err);
-      throw err;
+      throw new Error(`Erro ao buscar imóveis: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
     }
   },
   

@@ -282,17 +282,11 @@ const RealEstateForm = () => {
   }
   
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
           {isEditMode ? 'Editar Imóvel' : 'Novo Imóvel'}
         </h1>
-        <button
-          onClick={() => navigate('/real-estates')}
-          className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md flex items-center"
-        >
-          <FiArrowLeft className="mr-2" /> Voltar
-        </button>
       </div>
       
       {/* Mensagem de erro */}
