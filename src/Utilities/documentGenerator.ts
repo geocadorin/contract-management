@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { Document, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, BorderStyle, WidthType, AlignmentType, PageOrientation, HeadingStyle, Packer } from 'docx';
+import { Document, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, BorderStyle, WidthType, AlignmentType, PageOrientation, Packer } from 'docx';
 import { saveAs } from 'file-saver';
 import { Owner, Lessee } from '../interfaces/Person';
 import { RealEstate } from '../interfaces/RealEstate';
@@ -117,14 +117,12 @@ export const generateOwnerDocx = async (owner: Owner) => {
               after: 200,
             },
             style: "Strong",
-            color: themeColors.primary,
           }),
           
           new Paragraph({
             text: "DADOS PESSOAIS",
             heading: HeadingLevel.HEADING_2,
             thematicBreak: true,
-            color: themeColors.primary,
           }),
           
           new Paragraph({
@@ -182,7 +180,6 @@ export const generateOwnerDocx = async (owner: Owner) => {
             text: "ENDEREÇO",
             heading: HeadingLevel.HEADING_2,
             thematicBreak: true,
-            color: themeColors.primary,
           }),
           
           new Paragraph({
@@ -303,14 +300,12 @@ export const generateLesseeDocx = async (lessee: Lessee) => {
               after: 200,
             },
             style: "Strong",
-            color: themeColors.accent,
           }),
           
           new Paragraph({
             text: "DADOS PESSOAIS",
             heading: HeadingLevel.HEADING_2,
             thematicBreak: true,
-            color: themeColors.accent,
           }),
           
           new Paragraph({
@@ -368,7 +363,6 @@ export const generateLesseeDocx = async (lessee: Lessee) => {
             text: "ENDEREÇO",
             heading: HeadingLevel.HEADING_2,
             thematicBreak: true,
-            color: themeColors.accent,
           }),
           
           new Paragraph({
@@ -524,14 +518,12 @@ export const generateRealEstateDocx = async (realEstate: RealEstate) => {
               after: 200,
             },
             style: "Strong",
-            color: themeColors.highlight,
           }),
           
           new Paragraph({
             text: "DADOS DO IMÓVEL",
             heading: HeadingLevel.HEADING_2,
             thematicBreak: true,
-            color: themeColors.highlight,
           }),
           
           new Paragraph({
@@ -562,7 +554,6 @@ export const generateRealEstateDocx = async (realEstate: RealEstate) => {
             text: "LOCALIZAÇÃO",
             heading: HeadingLevel.HEADING_2,
             thematicBreak: true,
-            color: themeColors.highlight,
           }),
           
           new Paragraph({
@@ -602,7 +593,6 @@ export const generateRealEstateDocx = async (realEstate: RealEstate) => {
               text: "PROPRIETÁRIO",
               heading: HeadingLevel.HEADING_2,
               thematicBreak: true,
-              color: themeColors.highlight,
             }),
             
             new Paragraph({
@@ -627,7 +617,6 @@ export const generateRealEstateDocx = async (realEstate: RealEstate) => {
               text: "INQUILINO ATUAL",
               heading: HeadingLevel.HEADING_2,
               thematicBreak: true,
-              color: themeColors.highlight,
             }),
             
             new Paragraph({
@@ -652,7 +641,6 @@ export const generateRealEstateDocx = async (realEstate: RealEstate) => {
               text: "OBSERVAÇÕES",
               heading: HeadingLevel.HEADING_2,
               thematicBreak: true,
-              color: themeColors.highlight,
             }),
             
             new Paragraph({
@@ -775,14 +763,12 @@ export const generateContractDocx = async (contract: Contract) => {
               after: 200,
             },
             style: "Strong",
-            color: themeColors.primaryDark,
           }),
           
           new Paragraph({
             text: "INFORMAÇÕES DO CONTRATO",
             heading: HeadingLevel.HEADING_2,
             thematicBreak: true,
-            color: themeColors.primaryDark,
           }),
           
           new Paragraph({
@@ -846,7 +832,6 @@ export const generateContractDocx = async (contract: Contract) => {
               text: "PROPRIETÁRIO",
               heading: HeadingLevel.HEADING_2,
               thematicBreak: true,
-              color: themeColors.primaryDark,
             }),
             
             new Paragraph({
@@ -879,7 +864,6 @@ export const generateContractDocx = async (contract: Contract) => {
               text: "INQUILINO",
               heading: HeadingLevel.HEADING_2,
               thematicBreak: true,
-              color: themeColors.primaryDark,
             }),
             
             new Paragraph({
@@ -912,7 +896,6 @@ export const generateContractDocx = async (contract: Contract) => {
               text: "IMÓVEL",
               heading: HeadingLevel.HEADING_2,
               thematicBreak: true,
-              color: themeColors.primaryDark,
             }),
             
             new Paragraph({

@@ -10,7 +10,16 @@ const getIsDark = () => {
 const setIsDark = (isDark: boolean) => {
   const darkLiteral = isDark ? 'dark' : 'light'
   window.localStorage.setItem('appTheme', darkLiteral)
-  window.electron.ipcRenderer.sendMessage('theme', [darkLiteral])
+  
+  // Verificar se a API electron está disponível antes de usá-la
+  if (window.electron && window.electron.ipcRenderer) {
+    try {
+      window.electron.ipcRenderer.sendMessage('theme', [darkLiteral])
+    } catch (error) {
+      console.error('Erro ao enviar mensagem para o Electron:', error)
+    }
+  }
+  
   if (isDark) {
     window.document.documentElement.classList.add('dark')
   } else {
@@ -23,7 +32,13 @@ const toggleTheme = () => {
 }
 
 const firstRun = () => {
-  setIsDark(getIsDark())
+  try {
+    setIsDark(getIsDark())
+  } catch (error) {
+    console.error('Erro ao inicializar o tema:', error)
+    // Fallback para tema claro se houver erro
+    window.document.documentElement.classList.remove('dark')
+  }
 }
 
 export { toggleTheme, setIsDark, firstRun }

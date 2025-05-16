@@ -62,6 +62,8 @@ async function createWindow() {
     win.webContents.openDevTools()
   } else {
     win.loadFile(indexHtml)
+    // Adicionar esta linha para abrir DevTools na versão em produção também
+    win.webContents.openDevTools()
   }
 
   // Make all links open with the browser, not with the application
