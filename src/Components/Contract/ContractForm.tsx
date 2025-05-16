@@ -222,7 +222,7 @@ const ContractForm = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
       </div>
     );
   }
@@ -230,7 +230,7 @@ const ContractForm = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold text-primary">
           {isEditMode ? 'Editar Contrato' : 'Novo Contrato'}
         </h1>
       </div>
@@ -245,7 +245,7 @@ const ContractForm = () => {
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg overflow-hidden mb-6">
         <div className="p-6">
           {/* Seção: Informações Básicas */}
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h2 className="text-xl font-semibold text-primary mb-4 flex items-center">
             <FiTag className="mr-2" /> Informações do Contrato
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -259,13 +259,13 @@ const ContractForm = () => {
                   name="identifier"
                   value={contract.identifier}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-accent"
                   required
                 />
                 <button
                   type="button"
                   onClick={generateIdentifier}
-                  className="bg-gray-200 text-gray-700 px-3 py-2 rounded-r-md hover:bg-gray-300"
+                  className="bg-accent text-light px-3 py-2 rounded-r-md hover:bg-accent-dark transition duration-150"
                   title="Gerar identificador"
                 >
                   Gerar
@@ -281,7 +281,7 @@ const ContractForm = () => {
                 name="contract_kind"
                 value={contract.contract_kind}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
                 required
               >
                 <option value="">Selecione um tipo de contrato</option>
@@ -299,7 +299,7 @@ const ContractForm = () => {
                 name="owner_id"
                 value={contract.owner_id}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
                 required
               >
                 <option value="">Selecione um proprietário</option>
@@ -317,7 +317,7 @@ const ContractForm = () => {
                 name="real_estate_id"
                 value={contract.real_estate_id}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
                 required
               >
                 <option value="">Selecione um imóvel</option>
@@ -337,7 +337,7 @@ const ContractForm = () => {
                 name="lessee_id"
                 value={contract.lessee_id || ''}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
               >
                 <option value="">Selecione um inquilino</option>
                 {lessees.map(lessee => (
@@ -354,7 +354,7 @@ const ContractForm = () => {
                 name="status"
                 value={contract.status}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
                 required
               >
                 {contractStatuses.map(status => (
@@ -365,7 +365,7 @@ const ContractForm = () => {
           </div>
           
           {/* Seção: Período e Pagamento */}
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h2 className="text-xl font-semibold text-primary mb-4 flex items-center">
             <FiCalendar className="mr-2" /> Período e Pagamento
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -378,7 +378,7 @@ const ContractForm = () => {
                 name="start_date"
                 value={contract.start_date}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
                 required
               />
             </div>
@@ -392,7 +392,7 @@ const ContractForm = () => {
                 name="end_date"
                 value={contract.end_date || ''}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
             
@@ -408,7 +408,7 @@ const ContractForm = () => {
                 step="0.01"
                 min="0"
                 placeholder="0,00"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
                 required
               />
             </div>
@@ -425,7 +425,7 @@ const ContractForm = () => {
                 min="1"
                 max="31"
                 placeholder="Dia do mês (1-31)"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
             
@@ -440,7 +440,7 @@ const ContractForm = () => {
                 onChange={handleChange}
                 min="1"
                 placeholder="Duração em meses"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
           </div>
@@ -450,18 +450,18 @@ const ContractForm = () => {
             <button
               type="button"
               onClick={() => navigate('/contracts')}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-md mr-2"
+              className="bg-gray-300 hover:bg-primary text-gray-800 hover:text-light font-medium py-2 px-4 rounded-md mr-2 transition duration-150"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md flex items-center"
+              className="bg-accent hover:bg-accent-dark text-light font-medium py-2 px-4 rounded-md flex items-center"
             >
               {submitting ? (
                 <>
-                  <div className="animate-spin h-5 w-5 mr-2 border-t-2 border-b-2 border-white rounded-full"></div>
+                  <div className="animate-spin h-5 w-5 mr-2 border-t-2 border-b-2 border-light rounded-full"></div>
                   Salvando...
                 </>
               ) : (

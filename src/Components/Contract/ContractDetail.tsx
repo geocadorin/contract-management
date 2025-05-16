@@ -60,7 +60,7 @@ const ContractDetail = () => {
     
     const statusClasses = {
       'Ativo': 'bg-green-100 text-green-800',
-      'Concluído': 'bg-gray-100 text-gray-800',
+      'Concluído': 'bg-highlight text-light',
       'Cancelado': 'bg-red-100 text-red-800'
     };
     
@@ -90,7 +90,7 @@ const ContractDetail = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accent"></div>
       </div>
     );
   }
@@ -103,7 +103,7 @@ const ContractDetail = () => {
         </div>
         <button
           onClick={() => navigate('/contracts')}
-          className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-md flex items-center"
+          className="bg-accent hover:bg-accent-dark text-light py-2 px-4 rounded-md flex items-center transition duration-150"
         >
           <FiArrowLeft className="mr-2" /> Voltar para a lista
         </button>
@@ -114,10 +114,10 @@ const ContractDetail = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Detalhes do Contrato</h1>
+        <h1 className="text-2xl font-bold text-primary">Detalhes do Contrato</h1>
         <Link
           to={`/contracts/edit/${id}`}
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
+          className="bg-accent hover:bg-accent-dark text-light py-2 px-4 rounded-md flex items-center transition duration-150"
         >
           <FiEdit className="mr-2" /> Editar
         </Link>
@@ -144,7 +144,7 @@ const ContractDetail = () => {
         
         {/* Informações básicas */}
         <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h2 className="text-xl font-semibold text-primary mb-4 flex items-center">
             <FiHome className="mr-2" /> Informações Básicas
           </h2>
           
@@ -189,7 +189,7 @@ const ContractDetail = () => {
           </div>
           
           {/* Período e pagamento */}
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <h2 className="text-xl font-semibold text-primary mb-4 flex items-center">
             <FiCalendar className="mr-2" /> Período e Pagamento
           </h2>
           

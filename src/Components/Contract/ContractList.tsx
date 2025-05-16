@@ -157,14 +157,21 @@ const ContractList = () => {
   
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Contratos</h1>
-        <Link 
-          to="/contracts/new" 
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
-        >
-          <FiPlus className="mr-2" /> Novo Contrato
-        </Link>
+      <div className="bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex flex-wrap justify-between items-center">
+            <h1 className="text-2xl font-bold text-primary mb-4 md:mb-0">Contratos</h1>
+            
+            <div className="flex flex-wrap items-center gap-2">
+              <Link
+                to="/contracts/new"
+                className="bg-accent hover:bg-accent-dark text-white font-medium py-2 px-4 rounded-md flex items-center"
+              >
+                <FiPlus className="mr-2" /> Novo Contrato
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
       
       {/* Mensagem de erro */}
@@ -176,7 +183,7 @@ const ContractList = () => {
       
       {/* Filtros */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
+        <h2 className="text-lg font-semibold text-primary mb-4 flex items-center">
           <FiSearch className="mr-2" /> Filtros
         </h2>
         
@@ -278,9 +285,9 @@ const ContractList = () => {
         <div className="mt-4 flex justify-end">
           <button
             onClick={clearFilters}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+            className="px-4 py-2 bg-highlight hover:bg-accent text-light rounded-md flex items-center transition duration-150"
           >
-            Limpar Filtros
+            <FiSearch className="mr-2" /> Limpar Filtros
           </button>
         </div>
       </div>
@@ -292,31 +299,31 @@ const ContractList = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Identificador
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Tipo
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Proprietário
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Inquilino
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Imóvel
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Período
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Valor
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
@@ -349,7 +356,7 @@ const ContractList = () => {
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                         ${contract.status === 'Ativo' ? 'bg-green-100 text-green-800' : 
                           contract.status === 'Cancelado' ? 'bg-red-100 text-red-800' : 
-                          'bg-yellow-100 text-yellow-800'}`}>
+                          'bg-highlight text-light'}`}>
                         {contract.status}
                       </span>
                     </td>
@@ -357,21 +364,21 @@ const ContractList = () => {
                       <div className="flex justify-end space-x-2">
                         <Link 
                           to={`/contracts/${contract.id}`} 
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="text-accent hover:text-accent-dark"
                           title="Ver detalhes"
                         >
                           <FiEye size={18} />
                         </Link>
                         <Link 
                           to={`/contracts/edit/${contract.id}`} 
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-accent hover:text-accent-dark"
                           title="Editar"
                         >
                           <FiEdit size={18} />
                         </Link>
                         <button 
                           onClick={() => contract.id && handleDelete(contract.id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-primary hover:text-highlight"
                           title="Excluir"
                         >
                           <FiTrash2 size={18} />
@@ -420,7 +427,7 @@ const ContractList = () => {
                     onClick={() => goToPage(pageNumber)}
                     className={`px-3 py-1 rounded-md ${
                       currentPage === pageNumber 
-                        ? 'bg-blue-500 text-white' 
+                        ? 'bg-accent text-light' 
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
                   >
@@ -448,7 +455,7 @@ const ContractList = () => {
           <p className="text-gray-500 mb-4">Nenhum contrato encontrado.</p>
           <Link 
             to="/contracts/new" 
-            className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+            className="inline-flex items-center px-4 py-2 bg-accent hover:bg-accent-dark text-white rounded-md"
           >
             <FiPlus className="mr-2" /> Criar Novo Contrato
           </Link>
