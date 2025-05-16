@@ -4,90 +4,146 @@ import { RealEstate } from '../interfaces/RealEstate';
 export const realEstateService = {
   // Listar todos os imóveis
   async getAll(): Promise<RealEstate[]> {
-    const { data, error } = await supabase
-      .from('real_estates')
-      .select(`
-        *,
-        cities(*),
-        cities!inner (*, states(*)),
-        owners:persons!real_estates_owner_id_fkey(*),
-        lessees:persons!real_estates_lessee_id_fkey(*)
-      `)
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Erro ao buscar imóveis:', error);
-      throw error;
+    try {
+      // Tentar primeiro com alguns relacionamentos básicos
+      try {
+        const { data, error } = await supabase
+          .from('real_estates')
+          .select(`
+            *,
+            cities (*),
+            owners:persons (id, full_name)
+          `)
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          throw error;
+        }
+        
+        return data || [];
+      } catch (joinError) {
+        console.error('Erro ao buscar imóveis com joins:', joinError);
+        
+        // Se falhar, tentar consulta simples sem relacionamentos
+        const { data, error } = await supabase
+          .from('real_estates')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Erro mesmo na consulta simples:', error);
+          throw error;
+        }
+        
+        return data || [];
+      }
+    } catch (err) {
+      console.error('Exceção ao buscar imóveis:', err);
+      throw err;
     }
-    
-    return data || [];
   },
   
   // Buscar imóvel por ID
   async getById(id: string): Promise<RealEstate | null> {
-    const { data, error } = await supabase
-      .from('real_estates')
-      .select(`
-        *,
-        cities(*),
-        cities!inner (*, states(*)),
-        owners:persons!real_estates_owner_id_fkey(*),
-        lessees:persons!real_estates_lessee_id_fkey(*)
-      `)
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      console.error('Erro ao buscar imóvel por ID:', error);
-      throw error;
+    try {
+      // Tentar primeiro com joins simples
+      try {
+        const { data, error } = await supabase
+          .from('real_estates')
+          .select(`
+            *,
+            cities (*),
+            owners:persons (id, full_name)
+          `)
+          .eq('id', id)
+          .single();
+        
+        if (error) {
+          throw error;
+        }
+        
+        return data;
+      } catch (joinError) {
+        console.error('Erro ao buscar imóvel com joins:', joinError);
+        
+        // Se falhar, tentar consulta simples sem relacionamentos
+        const { data, error } = await supabase
+          .from('real_estates')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) {
+          console.error('Erro mesmo na consulta simples:', error);
+          throw error;
+        }
+        
+        return data;
+      }
+    } catch (err) {
+      console.error('Exceção ao buscar imóvel por ID:', err);
+      throw err;
     }
-    
-    return data;
   },
   
   // Criar novo imóvel
   async create(realEstate: RealEstate): Promise<RealEstate> {
-    const { data, error } = await supabase
-      .from('real_estates')
-      .insert([realEstate])
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Erro ao criar imóvel:', error);
-      throw error;
+    try {
+      const { data, error } = await supabase
+        .from('real_estates')
+        .insert([realEstate])
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Erro detalhado ao criar imóvel:', error);
+        throw error;
+      }
+      
+      return data;
+    } catch (err) {
+      console.error('Exceção ao criar imóvel:', err);
+      throw err;
     }
-    
-    return data;
   },
   
   // Atualizar imóvel existente
   async update(id: string, realEstate: Partial<RealEstate>): Promise<RealEstate> {
-    const { data, error } = await supabase
-      .from('real_estates')
-      .update(realEstate)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Erro ao atualizar imóvel:', error);
-      throw error;
+    try {
+      const { data, error } = await supabase
+        .from('real_estates')
+        .update(realEstate)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Erro detalhado ao atualizar imóvel:', error);
+        throw error;
+      }
+      
+      return data;
+    } catch (err) {
+      console.error('Exceção ao atualizar imóvel:', err);
+      throw err;
     }
-    
-    return data;
   },
   
   // Excluir imóvel
   async delete(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('real_estates')
-      .delete()
-      .eq('id', id);
-    
-    if (error) {
-      console.error('Erro ao excluir imóvel:', error);
-      throw error;
+    try {
+      const { error } = await supabase
+        .from('real_estates')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Erro detalhado ao excluir imóvel:', error);
+        throw error;
+      }
+    } catch (err) {
+      console.error('Exceção ao excluir imóvel:', err);
+      throw err;
     }
   }
 }; 

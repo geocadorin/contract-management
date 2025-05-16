@@ -25,11 +25,12 @@ const RealEstateList = () => {
       try {
         setLoading(true);
         const data = await realEstateService.getAll();
+        console.log('Dados de imóveis carregados:', data);
         setRealEstates(data);
         setError(null);
       } catch (err) {
+        console.error('Erro detalhado ao carregar imóveis:', err);
         setError('Erro ao carregar imóveis. Por favor, tente novamente.');
-        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -94,6 +95,14 @@ const RealEstateList = () => {
   const formatCep = (cep: string) => {
     if (!cep) return '';
     return cep.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+  };
+  
+  // Verificar se o imóvel tem as informações de cidade/estado
+  const getCityStateInfo = (realEstate: RealEstate) => {
+    if (realEstate.cities?.name && realEstate.cities?.states?.uf) {
+      return `${realEstate.cities.name}, ${realEstate.cities.states.uf}`;
+    }
+    return 'Informação não disponível';
   };
   
   if (loading) {
@@ -227,7 +236,7 @@ const RealEstateList = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{formatAddress(realEstate)}</div>
                       <div className="text-sm text-gray-500">
-                        {realEstate.cities?.name}, {realEstate.cities?.states?.uf} - CEP: {formatCep(realEstate.cep)}
+                        CEP: {formatCep(realEstate.cep)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -247,7 +256,7 @@ const RealEstateList = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{realEstate.owners?.full_name}</div>
+                      <div className="text-sm text-gray-900">{realEstate.owners?.full_name || 'Não especificado'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Link 

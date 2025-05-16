@@ -246,16 +246,28 @@ const RealEstateForm = () => {
       // Remover apenas números do CEP
       dataToSend.cep = dataToSend.cep.replace(/\D/g, '');
       
-      if (isEditMode && id) {
-        await realEstateService.update(id, dataToSend);
-      } else {
-        await realEstateService.create(dataToSend);
-      }
+      console.log('Dados que serão enviados:', dataToSend);
       
-      navigate('/real-estates');
-    } catch (err) {
-      console.error('Erro ao salvar imóvel:', err);
-      setError('Erro ao salvar imóvel. Por favor, tente novamente.');
+      if (isEditMode && id) {
+        try {
+          await realEstateService.update(id, dataToSend);
+          navigate('/real-estates');
+        } catch (error: any) {
+          console.error('Erro específico na atualização:', error);
+          setError(`Erro ao atualizar imóvel: ${error?.message || 'Verifique os dados e tente novamente.'}`);
+        }
+      } else {
+        try {
+          await realEstateService.create(dataToSend);
+          navigate('/real-estates');
+        } catch (error: any) {
+          console.error('Erro específico na criação:', error);
+          setError(`Erro ao criar imóvel: ${error?.message || 'Verifique os dados e tente novamente.'}`);
+        }
+      }
+    } catch (error: any) {
+      console.error('Erro ao salvar imóvel:', error);
+      setError(`Erro ao salvar imóvel: ${error?.message || 'Por favor, tente novamente.'}`);
     } finally {
       setSubmitting(false);
     }

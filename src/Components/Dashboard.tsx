@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [lesseeCount, setLesseeCount] = useState<number>(0);
   const [realEstateCount, setRealEstateCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const { session, supabase } = useAuth();
   
   useEffect(() => {
@@ -17,16 +18,24 @@ const Dashboard = () => {
       try {
         setLoading(true);
         
-        // Buscar contagem de proprietários, inquilinos e imóveis
+        // Buscar contagem de proprietários e inquilinos
         const owners = await ownerService.getAll();
         const lessees = await lesseeService.getAll();
-        const realEstates = await realEstateService.getAll();
         
         setOwnerCount(owners.length);
         setLesseeCount(lessees.length);
-        setRealEstateCount(realEstates.length);
+        
+        // Buscar imóveis em uma operação separada para facilitar a depuração
+        try {
+          const realEstates = await realEstateService.getAll();
+          setRealEstateCount(realEstates.length);
+        } catch (realEstateErr) {
+          console.error('Erro específico ao carregar imóveis:', realEstateErr);
+          setError('Erro ao carregar imóveis. Verifique o console para mais detalhes.');
+        }
       } catch (err) {
         console.error('Erro ao carregar dados do dashboard:', err);
+        setError('Erro ao carregar dados. Tente novamente mais tarde.');
       } finally {
         setLoading(false);
       }
@@ -62,6 +71,12 @@ const Dashboard = () => {
           <FiLogOut className="mr-2" /> Sair
         </button>
       </div>
+      
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {/* Card de proprietários */}
