@@ -7,6 +7,9 @@ import OwnerDetails from './Owner/OwnerDetails';
 import LesseeList from './Lessee/LesseeList';
 import LesseeForm from './Lessee/LesseeForm';
 import LesseeDetails from './Lessee/LesseeDetails';
+import RealEstateList from './RealEstate/RealEstateList';
+import RealEstateForm from './RealEstate/RealEstateForm';
+import RealEstateDetails from './RealEstate/RealEstateDetails';
 import Dashboard from './Dashboard';
 
 // Componente de proteção de rota
@@ -65,6 +68,12 @@ const AppRoutes = () => {
       <Route path="/lessees/new" element={<ProtectedRoute><LesseeForm /></ProtectedRoute>} />
       <Route path="/lessees/:id" element={<ProtectedRoute><LesseeDetails /></ProtectedRoute>} />
       <Route path="/lessees/:id/edit" element={<ProtectedRoute><LesseeForm /></ProtectedRoute>} />
+      
+      {/* Rotas de imóveis */}
+      <Route path="/real-estates" element={<ProtectedRoute><RealEstateList /></ProtectedRoute>} />
+      <Route path="/real-estates/new" element={<ProtectedRoute><RealEstateForm /></ProtectedRoute>} />
+      <Route path="/real-estates/:id" element={<ProtectedRoute><RealEstateDetails /></ProtectedRoute>} />
+      <Route path="/real-estates/:id/edit" element={<ProtectedRoute><RealEstateForm /></ProtectedRoute>} />
       
       {/* Rota padrão */}
       <Route path="*" element={<Navigate to="/" />} />

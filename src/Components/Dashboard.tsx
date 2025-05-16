@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ownerService, lesseeService } from '../services/personService';
-import { FiHome, FiUsers, FiUserPlus, FiUser, FiLogOut } from 'react-icons/fi';
+import { realEstateService } from '../services/realEstateService';
+import { FiHome, FiUsers, FiUserPlus, FiUser, FiLogOut, FiKey } from 'react-icons/fi';
 import { useAuth } from './AuthProvider';
 
 const Dashboard = () => {
   const [ownerCount, setOwnerCount] = useState<number>(0);
   const [lesseeCount, setLesseeCount] = useState<number>(0);
+  const [realEstateCount, setRealEstateCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const { session, supabase } = useAuth();
   
@@ -15,12 +17,14 @@ const Dashboard = () => {
       try {
         setLoading(true);
         
-        // Buscar contagem de proprietários e inquilinos
+        // Buscar contagem de proprietários, inquilinos e imóveis
         const owners = await ownerService.getAll();
         const lessees = await lesseeService.getAll();
+        const realEstates = await realEstateService.getAll();
         
         setOwnerCount(owners.length);
         setLesseeCount(lessees.length);
+        setRealEstateCount(realEstates.length);
       } catch (err) {
         console.error('Erro ao carregar dados do dashboard:', err);
       } finally {
@@ -59,7 +63,7 @@ const Dashboard = () => {
         </button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {/* Card de proprietários */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
@@ -101,11 +105,32 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
+        
+        {/* Card de imóveis */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-500 text-sm">Imóveis</p>
+              <p className="text-3xl font-bold text-gray-800">{realEstateCount}</p>
+            </div>
+            <div className="bg-orange-100 p-3 rounded-full">
+              <FiHome className="text-orange-500 text-xl" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <Link
+              to="/real-estates"
+              className="text-orange-500 text-sm hover:underline"
+            >
+              Ver todos
+            </Link>
+          </div>
+        </div>
       </div>
       
       <h2 className="text-xl font-semibold text-gray-800 mb-4">Ações Rápidas</h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Link
           to="/owners/new"
           className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center text-center"
@@ -129,6 +154,17 @@ const Dashboard = () => {
         </Link>
         
         <Link
+          to="/real-estates/new"
+          className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center text-center"
+        >
+          <div className="bg-orange-100 p-4 rounded-full mb-4">
+            <FiHome className="text-orange-500 text-2xl" />
+          </div>
+          <h3 className="font-semibold text-gray-800 mb-2">Novo Imóvel</h3>
+          <p className="text-gray-600 text-sm">Cadastrar um novo imóvel no sistema</p>
+        </Link>
+        
+        <Link
           to="/owners"
           className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center text-center"
         >
@@ -148,6 +184,17 @@ const Dashboard = () => {
           </div>
           <h3 className="font-semibold text-gray-800 mb-2">Inquilinos</h3>
           <p className="text-gray-600 text-sm">Gerenciar inquilinos cadastrados</p>
+        </Link>
+        
+        <Link
+          to="/real-estates"
+          className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center text-center"
+        >
+          <div className="bg-red-100 p-4 rounded-full mb-4">
+            <FiKey className="text-red-500 text-2xl" />
+          </div>
+          <h3 className="font-semibold text-gray-800 mb-2">Imóveis</h3>
+          <p className="text-gray-600 text-sm">Gerenciar imóveis cadastrados</p>
         </Link>
       </div>
     </div>

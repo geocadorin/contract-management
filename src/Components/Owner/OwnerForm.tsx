@@ -4,7 +4,8 @@ import { Owner } from '../../interfaces/Person';
 import { ownerService } from '../../services/personService';
 import { locationService } from '../../services/locationService';
 import { MaritalStatus, State, City } from '../../interfaces/Person';
-import { FiSave, FiArrowLeft } from 'react-icons/fi';
+import { FiSave, FiArrowLeft, FiSearch } from 'react-icons/fi';
+import InputMask from 'react-input-mask';
 
 // Inicializador para formulário vazio
 const initialOwnerState: Omit<Owner, 'role'> = {
@@ -38,6 +39,10 @@ const OwnerForm = () => {
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [selectedStateId, setSelectedStateId] = useState<number | undefined>(undefined);
+  
+  // Estados para o processamento do CEP
+  const [loadingCep, setLoadingCep] = useState<boolean>(false);
+  const [cepError, setCepError] = useState<string | null>(null);
   
   // Carregar estados civis, estados e cidades
   useEffect(() => {
@@ -131,16 +136,67 @@ const OwnerForm = () => {
     const { name, value } = e.target;
     
     // Tratar campos especiais
-    if (name === 'cpf') {
-      // Remover caracteres não numéricos
-      const numericValue = value.replace(/\D/g, '');
-      setOwner(prev => ({ ...prev, [name]: numericValue }));
-    } else if (name === 'state_id') {
+    if (name === 'state_id') {
       setSelectedStateId(value ? Number(value) : undefined);
     } else if (name === 'city_id' || name === 'marital_status_id') {
       setOwner(prev => ({ ...prev, [name]: value ? Number(value) : undefined }));
     } else {
       setOwner(prev => ({ ...prev, [name]: value }));
+    }
+  };
+  
+  // Buscar endereço pelo CEP
+  const handleCepSearch = async () => {
+    const cep = owner.cep?.replace(/\D/g, '');
+    
+    if (!cep || cep.length !== 8) {
+      setCepError('CEP inválido. O CEP deve conter 8 dígitos.');
+      return;
+    }
+    
+    setLoadingCep(true);
+    setCepError(null);
+    
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+      const data = await response.json();
+      
+      if (data.erro) {
+        setCepError('CEP não encontrado.');
+        return;
+      }
+      
+      // Buscar estado e cidade correspondentes no banco de dados
+      const state = states.find(s => s.uf.toUpperCase() === data.uf.toUpperCase());
+      
+      if (state) {
+        setSelectedStateId(state.id);
+        
+        // Buscar cidades do estado
+        const citiesData = await locationService.getCitiesByState(state.id);
+        const city = citiesData.find(c => c.name.toUpperCase() === data.localidade.toUpperCase());
+        
+        setOwner(prev => ({
+          ...prev,
+          street: data.logradouro,
+          neighborhood: data.bairro,
+          city_id: city?.id
+        }));
+      } else {
+        // Se não encontrou o estado, apenas preencher os campos de endereço
+        setOwner(prev => ({
+          ...prev,
+          street: data.logradouro,
+          neighborhood: data.bairro
+        }));
+        
+        setCepError('Estado não encontrado no sistema. Preencha manualmente.');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar CEP:', err);
+      setCepError('Erro ao buscar CEP. Verifique sua conexão e tente novamente.');
+    } finally {
+      setLoadingCep(false);
     }
   };
   
@@ -278,14 +334,17 @@ const OwnerForm = () => {
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="cpf">
               CPF *
             </label>
-            <input
+            <InputMask
+              mask="999.999.999-99"
               type="text"
               id="cpf"
               name="cpf"
-              value={owner.cpf}
-              onChange={handleChange}
-              placeholder="Somente números"
-              maxLength={11}
+              value={owner.cpf || ''}
+              onChange={(e) => {
+                // Remover caracteres não numéricos antes de salvar no state
+                const numericValue = e.target.value.replace(/\D/g, '');
+                setOwner(prev => ({ ...prev, cpf: numericValue }));
+              }}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               required
             />
@@ -296,12 +355,17 @@ const OwnerForm = () => {
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="rg">
               RG
             </label>
-            <input
+            <InputMask
+              mask="99.999.999-9"
               type="text"
               id="rg"
               name="rg"
               value={owner.rg || ''}
-              onChange={handleChange}
+              onChange={(e) => {
+                // Salvar com a máscara removida
+                const value = e.target.value.replace(/[^\d]/g, '');
+                setOwner(prev => ({ ...prev, rg: value }));
+              }}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
@@ -333,12 +397,17 @@ const OwnerForm = () => {
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="celphone">
               Telefone/Celular
             </label>
-            <input
+            <InputMask
+              mask="(99) 99999-9999"
               type="text"
               id="celphone"
               name="celphone"
               value={owner.celphone || ''}
-              onChange={handleChange}
+              onChange={(e) => {
+                // Remover caracteres não numéricos
+                const numericValue = e.target.value.replace(/\D/g, '');
+                setOwner(prev => ({ ...prev, celphone: numericValue }));
+              }}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
@@ -370,15 +439,42 @@ const OwnerForm = () => {
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="cep">
               CEP
             </label>
-            <input
-              type="text"
-              id="cep"
-              name="cep"
-              value={owner.cep || ''}
-              onChange={handleChange}
-              placeholder="Somente números"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
+            <div className="flex">
+              <InputMask
+                mask="99999-999"
+                type="text"
+                id="cep"
+                name="cep"
+                value={owner.cep || ''}
+                onChange={(e) => {
+                  // Remover caracteres não numéricos
+                  const numericValue = e.target.value.replace(/\D/g, '');
+                  setOwner(prev => ({ ...prev, cep: numericValue }));
+                }}
+                className="shadow appearance-none border rounded-l w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              />
+              <button
+                type="button"
+                onClick={handleCepSearch}
+                disabled={loadingCep || !owner.cep || owner.cep.length !== 8}
+                className={`px-4 py-2 rounded-r flex items-center ${
+                  loadingCep || !owner.cep || owner.cep.length !== 8
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              >
+                {loadingCep ? (
+                  'Buscando...'
+                ) : (
+                  <>
+                    <FiSearch className="mr-1" /> Buscar
+                  </>
+                )}
+              </button>
+            </div>
+            {cepError && (
+              <p className="text-xs text-red-500 mt-1">{cepError}</p>
+            )}
           </div>
           
           {/* Estado */}

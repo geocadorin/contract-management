@@ -3,14 +3,14 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Lessee, PersonPartner, MaritalStatus, City } from '../../interfaces/Person';
 import { lesseeService, personService } from '../../services/personService';
 import { locationService } from '../../services/locationService';
-import { FiEdit, FiArrowLeft, FiUser, FiHome, FiPhone, FiMail, FiFile, FiUsers } from 'react-icons/fi';
+import { FiEdit, FiArrowLeft, FiUser, FiHome, FiPhone, FiMail, FiFile } from 'react-icons/fi';
+import PartnerList from '../Common/PartnerList';
 
 const LesseeDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   
   const [lessee, setLessee] = useState<Lessee | null>(null);
-  const [partners, setPartners] = useState<PersonPartner[]>([]);
   const [maritalStatus, setMaritalStatus] = useState<MaritalStatus | null>(null);
   const [city, setCity] = useState<City | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -29,10 +29,6 @@ const LesseeDetails = () => {
           throw new Error('Inquilino não encontrado');
         }
         setLessee(lesseeData);
-        
-        // Buscar parceiros/cônjuges
-        const partnersData = await personService.getPartners(id);
-        setPartners(partnersData);
         
         // Buscar estado civil se disponível
         if (lesseeData.marital_status_id) {
@@ -85,6 +81,32 @@ const LesseeDetails = () => {
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
   
+  // Formatar telefone
+  const formatPhone = (phone?: string) => {
+    if (!phone) return 'Não informado';
+    if (phone.length === 11) {
+      return phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else if (phone.length === 10) {
+      return phone.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    return phone;
+  };
+  
+  // Formatar RG
+  const formatRg = (rg?: string) => {
+    if (!rg) return 'Não informado';
+    if (rg.length === 9) {
+      return rg.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
+    }
+    return rg;
+  };
+  
+  // Formatar CEP
+  const formatCep = (cep?: string) => {
+    if (!cep) return 'Não informado';
+    return cep.replace(/(\d{5})(\d{3})/, '$1-$2');
+  };
+  
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
@@ -135,7 +157,7 @@ const LesseeDetails = () => {
             
             <div>
               <p className="text-sm font-semibold text-gray-600">RG</p>
-              <p className="text-gray-800">{lessee.rg || 'Não informado'}</p>
+              <p className="text-gray-800">{formatRg(lessee.rg)}</p>
             </div>
             
             <div>
@@ -154,7 +176,7 @@ const LesseeDetails = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-semibold text-gray-600">Telefone/Celular</p>
-              <p className="text-gray-800">{lessee.celphone || 'Não informado'}</p>
+              <p className="text-gray-800">{formatPhone(lessee.celphone)}</p>
             </div>
             
             <div>
@@ -173,7 +195,7 @@ const LesseeDetails = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-semibold text-gray-600">CEP</p>
-              <p className="text-gray-800">{lessee.cep || 'Não informado'}</p>
+              <p className="text-gray-800">{formatCep(lessee.cep)}</p>
             </div>
             
             <div>
@@ -206,49 +228,7 @@ const LesseeDetails = () => {
         </div>
         
         {/* Parceiros/Cônjuges */}
-        {partners.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2 flex items-center">
-              <FiUsers className="mr-2" /> Parceiros/Cônjuges
-            </h2>
-            
-            {partners.map((partner) => (
-              <div key={partner.id} className="bg-gray-50 p-4 rounded-md mb-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-600">Nome Completo</p>
-                    <p className="text-gray-800">{partner.full_name}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-semibold text-gray-600">CPF</p>
-                    <p className="text-gray-800">{partner.cpf ? formatCpf(partner.cpf) : 'Não informado'}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-semibold text-gray-600">RG</p>
-                    <p className="text-gray-800">{partner.rg || 'Não informado'}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-semibold text-gray-600">Órgão Emissor</p>
-                    <p className="text-gray-800">{partner.issuing_body || 'Não informado'}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-semibold text-gray-600">Telefone/Celular</p>
-                    <p className="text-gray-800">{partner.celphone || 'Não informado'}</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm font-semibold text-gray-600">E-mail</p>
-                    <p className="text-gray-800">{partner.email || 'Não informado'}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {id && <PartnerList personId={id} />}
         
         {/* Observações */}
         {lessee.note && (
