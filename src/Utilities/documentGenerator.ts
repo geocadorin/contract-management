@@ -811,6 +811,292 @@ export const generateContractPdf = (contract: Contract) => {
   doc.save(`contrato_${contract.identifier.replace(/\s+/g, '_')}.pdf`);
 };
 
+/**
+ * Gera um contrato profissional em PDF com base no tipo de contrato
+ * @param contract Dados do contrato
+ */
+export const generateProfessionalContractPdf = (contract: Contract) => {
+  const doc = new jsPDF();
+  
+  // Cabeçalho elegante
+  doc.setFillColor(themeColors.primary);
+  doc.rect(0, 0, doc.internal.pageSize.width, 30, 'F');
+  
+  doc.setTextColor(255);
+  doc.setFontSize(20);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CONTRATO', doc.internal.pageSize.width / 2, 15, { align: 'center' });
+  doc.setFontSize(12);
+  doc.text(`${contract.contract_kind.toUpperCase()}`, doc.internal.pageSize.width / 2, 23, { align: 'center' });
+  
+  // Informações do contrato
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(themeColors.primary);
+  doc.setFontSize(14);
+  doc.text(`CONTRATO Nº ${contract.identifier}`, doc.internal.pageSize.width / 2, 40, { align: 'center' });
+  
+  // Data e local
+  const today = new Date().toLocaleDateString('pt-BR');
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(60, 60, 60);
+  doc.text(`Data: ${today}`, 15, 50);
+  
+  // Separador
+  doc.setDrawColor(themeColors.primary);
+  doc.setLineWidth(0.5);
+  doc.line(15, 55, doc.internal.pageSize.width - 15, 55);
+  
+  // Dados das partes
+  let yPos = 65;
+  
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(themeColors.primary);
+  doc.text('PARTES CONTRATANTES:', 15, yPos);
+  yPos += 10;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(60, 60, 60);
+  
+  // Dados do proprietário (LOCADOR/VENDEDOR)
+  if (contract.owners) {
+    const title = contract.contract_kind.includes('Locação') ? 'LOCADOR(A):' : 'VENDEDOR(A):';
+    doc.setFont('helvetica', 'bold');
+    doc.text(title, 15, yPos);
+    doc.setFont('helvetica', 'normal');
+    
+    // Nome completo
+    doc.text(`${contract.owners.full_name}`, 15, yPos + 7);
+    
+    // Documentos
+    let docText = '';
+    if (contract.owners.cpf) docText += `CPF: ${contract.owners.cpf}`;
+    if (contract.owners.rg) docText += docText ? `, RG: ${contract.owners.rg}` : `RG: ${contract.owners.rg}`;
+    doc.text(docText, 15, yPos + 14);
+    
+    // Endereço
+    const ownerAddress = [
+      contract.owners.street || '',
+      contract.owners.number ? `, ${contract.owners.number}` : '',
+      contract.owners.complement ? `, ${contract.owners.complement}` : '',
+      contract.owners.neighborhood ? `, ${contract.owners.neighborhood}` : ''
+    ].join('');
+    
+    if (ownerAddress.trim()) {
+      doc.text(`Endereço: ${ownerAddress}`, 15, yPos + 21);
+    }
+    
+    // Contato
+    let contactText = '';
+    if (contract.owners.celphone) contactText += `Tel: ${contract.owners.celphone}`;
+    if (contract.owners.email) contactText += contactText ? `, Email: ${contract.owners.email}` : `Email: ${contract.owners.email}`;
+    
+    if (contactText) {
+      doc.text(contactText, 15, yPos + 28);
+      yPos += 35;
+    } else {
+      yPos += 28;
+    }
+  }
+  
+  // Dados do inquilino (LOCATÁRIO/COMPRADOR) - se aplicável
+  if (contract.lessees && contract.contract_kind.includes('Locação')) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('LOCATÁRIO(A):', 15, yPos);
+    doc.setFont('helvetica', 'normal');
+    
+    // Nome completo
+    doc.text(`${contract.lessees.full_name}`, 15, yPos + 7);
+    
+    // Documentos
+    let docText = '';
+    if (contract.lessees.cpf) docText += `CPF: ${contract.lessees.cpf}`;
+    if (contract.lessees.rg) docText += docText ? `, RG: ${contract.lessees.rg}` : `RG: ${contract.lessees.rg}`;
+    doc.text(docText, 15, yPos + 14);
+    
+    // Endereço
+    const lesseeAddress = [
+      contract.lessees.street || '',
+      contract.lessees.number ? `, ${contract.lessees.number}` : '',
+      contract.lessees.complement ? `, ${contract.lessees.complement}` : '',
+      contract.lessees.neighborhood ? `, ${contract.lessees.neighborhood}` : ''
+    ].join('');
+    
+    if (lesseeAddress.trim()) {
+      doc.text(`Endereço: ${lesseeAddress}`, 15, yPos + 21);
+    }
+    
+    // Contato
+    let contactText = '';
+    if (contract.lessees.celphone) contactText += `Tel: ${contract.lessees.celphone}`;
+    if (contract.lessees.email) contactText += contactText ? `, Email: ${contract.lessees.email}` : `Email: ${contract.lessees.email}`;
+    
+    if (contactText) {
+      doc.text(contactText, 15, yPos + 28);
+      yPos += 35;
+    } else {
+      yPos += 28;
+    }
+  }
+  
+  // Dados do imóvel
+  if (contract.real_estates) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('IMÓVEL OBJETO DO CONTRATO:', 15, yPos);
+    doc.setFont('helvetica', 'normal');
+    
+    const realEstateType = contract.real_estates.real_estate_kind || 'Imóvel';
+    const realEstateAddress = [
+      contract.real_estates.street || '',
+      contract.real_estates.number ? `, ${contract.real_estates.number}` : '',
+      contract.real_estates.complement ? `, ${contract.real_estates.complement}` : '',
+      contract.real_estates.neighborhood ? `, ${contract.real_estates.neighborhood}` : ''
+    ].join('');
+    
+    // Tipo e endereço
+    doc.text(`${realEstateType}: ${realEstateAddress}`, 15, yPos + 7);
+    
+    // Matrícula
+    if (contract.real_estates.municipal_registration) {
+      doc.text(`Matrícula: ${contract.real_estates.municipal_registration}`, 15, yPos + 14);
+    }
+    
+    yPos += 21;
+  }
+  
+  // Conteúdo do contrato com base no tipo
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(themeColors.primary);
+  doc.text('CLÁUSULAS E CONDIÇÕES:', 15, yPos);
+  yPos += 10;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(60, 60, 60);
+  
+  // Texto específico com base no tipo de contrato
+  if (contract.contract_kind === 'Locação' || contract.contract_kind === 'Locação com administração') {
+    // Cláusulas para contrato de locação
+    doc.setFont('helvetica', 'bold');
+    doc.text('CLÁUSULA PRIMEIRA - DO OBJETO', 15, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos += 7;
+    
+    const texto1 = `O(A) LOCADOR(A) cede ao(à) LOCATÁRIO(A) o imóvel acima identificado, para fins residenciais, pelo prazo de ${contract.duration || 12} meses, iniciando em ${formatDate(contract.start_date)} e terminando em ${formatDate(contract.end_date)}.`;
+    
+    // Quebra de texto em múltiplas linhas
+    const splitText1 = doc.splitTextToSize(texto1, 180);
+    doc.text(splitText1, 15, yPos);
+    yPos += splitText1.length * 5 + 5;
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('CLÁUSULA SEGUNDA - DO ALUGUEL E ENCARGOS', 15, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos += 7;
+    
+    const texto2 = `O aluguel mensal é de ${formatCurrency(contract.payment_value)}, a ser pago até o dia ${contract.day_payment || 5} de cada mês, acrescido das despesas de consumo de água, luz, telefone, condomínio e demais encargos que incidam sobre o imóvel.`;
+    
+    const splitText2 = doc.splitTextToSize(texto2, 180);
+    doc.text(splitText2, 15, yPos);
+    yPos += splitText2.length * 5 + 5;
+    
+    // Administração, se aplicável
+    if (contract.contract_kind === 'Locação com administração') {
+      doc.setFont('helvetica', 'bold');
+      doc.text('CLÁUSULA TERCEIRA - DA ADMINISTRAÇÃO', 15, yPos);
+      doc.setFont('helvetica', 'normal');
+      yPos += 7;
+      
+      const texto3 = `A administração deste contrato será realizada pela empresa SOGRINHA GESTÃO DE CONTRATOS, que se responsabiliza pela coleta de aluguéis, prestação de contas ao LOCADOR e pela supervisão do cumprimento das cláusulas contratuais por ambas as partes.`;
+      
+      const splitText3 = doc.splitTextToSize(texto3, 180);
+      doc.text(splitText3, 15, yPos);
+      yPos += splitText3.length * 5 + 5;
+    }
+  } else if (contract.contract_kind === 'Venda com exclusividade' || contract.contract_kind === 'Venda sem exclusividade') {
+    // Cláusulas para contrato de venda
+    doc.setFont('helvetica', 'bold');
+    doc.text('CLÁUSULA PRIMEIRA - DO OBJETO', 15, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos += 7;
+    
+    const texto1 = `O presente contrato tem por objeto a venda do imóvel acima identificado, de propriedade do(a) VENDEDOR(A), pelo valor de ${formatCurrency(contract.payment_value)}.`;
+    
+    const splitText1 = doc.splitTextToSize(texto1, 180);
+    doc.text(splitText1, 15, yPos);
+    yPos += splitText1.length * 5 + 5;
+    
+    // Exclusividade, se aplicável
+    if (contract.contract_kind === 'Venda com exclusividade') {
+      doc.setFont('helvetica', 'bold');
+      doc.text('CLÁUSULA SEGUNDA - DA EXCLUSIVIDADE', 15, yPos);
+      doc.setFont('helvetica', 'normal');
+      yPos += 7;
+      
+      const texto2 = `O VENDEDOR concede à SOGRINHA GESTÃO DE CONTRATOS a exclusividade para intermediar a venda do imóvel, pelo período de ${contract.duration || 3} meses, a contar da data de assinatura deste contrato.`;
+      
+      const splitText2 = doc.splitTextToSize(texto2, 180);
+      doc.text(splitText2, 15, yPos);
+      yPos += splitText2.length * 5 + 5;
+    }
+  }
+  
+  // Cláusula geral para todos os tipos
+  doc.setFont('helvetica', 'bold');
+  doc.text('DISPOSIÇÕES FINAIS', 15, yPos);
+  doc.setFont('helvetica', 'normal');
+  yPos += 7;
+  
+  const textoFinal = `Para firmeza e como prova de assim haverem contratado, as partes assinam o presente contrato em duas vias de igual teor e forma, na presença das testemunhas abaixo.`;
+  
+  const splitTextoFinal = doc.splitTextToSize(textoFinal, 180);
+  doc.text(splitTextoFinal, 15, yPos);
+  yPos += splitTextoFinal.length * 5 + 20;
+  
+  // Local e data
+  doc.text('Local e data: ___________________________, _____ de _______________ de _______', doc.internal.pageSize.width / 2, yPos, { align: 'center' });
+  yPos += 15;
+  
+  // Assinaturas
+  const colWidth = (doc.internal.pageSize.width - 30) / 2;
+  
+  if (contract.contract_kind.includes('Locação')) {
+    doc.text('_'.repeat(30), 15 + colWidth/2, yPos, { align: 'center' });
+    doc.text('_'.repeat(30), 15 + colWidth + colWidth/2, yPos, { align: 'center' });
+    yPos += 5;
+    
+    doc.text('LOCADOR(A)', 15 + colWidth/2, yPos, { align: 'center' });
+    doc.text('LOCATÁRIO(A)', 15 + colWidth + colWidth/2, yPos, { align: 'center' });
+  } else {
+    doc.text('_'.repeat(30), 15 + colWidth/2, yPos, { align: 'center' });
+    doc.text('_'.repeat(30), 15 + colWidth + colWidth/2, yPos, { align: 'center' });
+    yPos += 5;
+    
+    doc.text('VENDEDOR(A)', 15 + colWidth/2, yPos, { align: 'center' });
+    doc.text('COMPRADOR(A)/INTERMEDIADOR(A)', 15 + colWidth + colWidth/2, yPos, { align: 'center' });
+  }
+  
+  // Testemunhas
+  yPos += 20;
+  doc.text('_'.repeat(30), 15 + colWidth/2, yPos, { align: 'center' });
+  doc.text('_'.repeat(30), 15 + colWidth + colWidth/2, yPos, { align: 'center' });
+  yPos += 5;
+  
+  doc.text('TESTEMUNHA 1', 15 + colWidth/2, yPos, { align: 'center' });
+  doc.text('TESTEMUNHA 2', 15 + colWidth + colWidth/2, yPos, { align: 'center' });
+  
+  // Rodapé
+  doc.setFontSize(8);
+  doc.text('SOGRINHA GESTÃO DE CONTRATOS - Documento gerado em ' + today, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+  
+  // Salva o PDF
+  doc.save(`contrato_profissional_${contract.identifier.replace(/\s+/g, '_')}.pdf`);
+};
+
 export const generateContractDocx = async (contract: Contract) => {
   const doc = new Document({
     sections: [

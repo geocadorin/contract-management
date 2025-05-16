@@ -5,7 +5,8 @@ import { contractService } from '../../services/contractService';
 import { FiEdit, FiArrowLeft, FiCalendar, FiDollarSign, FiHome, FiUser, FiTag } from 'react-icons/fi';
 import { SiAdobeacrobatreader } from 'react-icons/si';
 import { BsFiletypeDocx } from 'react-icons/bs';
-import { generateContractPdf, generateContractDocx } from '../../Utilities/documentGenerator';
+import { MdOutlineBackup } from 'react-icons/md';
+import { generateContractPdf, generateContractDocx, generateProfessionalContractPdf } from '../../Utilities/documentGenerator';
 
 const ContractDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,7 +14,11 @@ const ContractDetail = () => {
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [exportLoading, setExportLoading] = useState<{pdf: boolean, docx: boolean}>({pdf: false, docx: false});
+  const [exportLoading, setExportLoading] = useState<{pdf: boolean, docx: boolean, professionalPdf: boolean}>({
+    pdf: false, 
+    docx: false, 
+    professionalPdf: false
+  });
   
   useEffect(() => {
     const fetchContract = async () => {
@@ -116,6 +121,19 @@ const ContractDetail = () => {
       setExportLoading(prev => ({...prev, docx: false}));
     }
   };
+
+  const handleExportProfessionalContract = () => {
+    if (!contract) return;
+    setExportLoading(prev => ({...prev, professionalPdf: true}));
+    try {
+      generateProfessionalContractPdf(contract);
+    } catch (error) {
+      console.error('Erro ao gerar contrato profissional:', error);
+      alert('Erro ao gerar o contrato profissional. Por favor, tente novamente.');
+    } finally {
+      setExportLoading(prev => ({...prev, professionalPdf: false}));
+    }
+  };
   
   if (loading) {
     return (
@@ -146,6 +164,18 @@ const ContractDetail = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-primary">Detalhes do Contrato</h1>
         <div className="flex space-x-2">
+          <button
+            onClick={handleExportProfessionalContract}
+            disabled={exportLoading.professionalPdf}
+            className="bg-purple-700 hover:bg-purple-800 text-white py-2 px-4 rounded-md flex items-center"
+          >
+            {exportLoading.professionalPdf ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+            ) : (
+              <MdOutlineBackup className="mr-2" />
+            )}
+            Contrato Profissional
+          </button>
           <button
             onClick={handleExportPdf}
             disabled={exportLoading.pdf}
