@@ -110,6 +110,16 @@ const RealEstateList = () => {
     return 'Informação não disponível';
   };
 
+  // Função para formatar telefone
+  const formatPhone = (phone: string) => {
+    return phone.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, '($1) $2 $3-$4');
+  };
+
+  // Função para formatar RG
+  const formatRg = (rg: string) => {
+    return rg.replace(/(\d{2})(\d{3})(\d{3})/, '$1.$2.$3');
+  };
+
   // Exportar para Excel
   const handleExportToExcel = () => {
     try {
@@ -260,6 +270,12 @@ const RealEstateList = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Proprietário
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    RG
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Telefone
+                  </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ações
                   </th>
@@ -292,6 +308,12 @@ const RealEstateList = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{realEstate.owners?.full_name || 'Não especificado'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {realEstate.owners?.rg ? formatRg(realEstate.owners.rg) : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {realEstate.owners?.celphone ? formatPhone(realEstate.owners.celphone) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <ActionDropdown

@@ -103,6 +103,16 @@ const OwnerList = () => {
     }
   };
 
+  // Função para formatar telefone
+  const formatPhone = (phone: string) => {
+    return phone.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, '($1) $2 $3-$4');
+  };
+
+  // Função para formatar RG
+  const formatRg = (rg: string) => {
+    return rg.replace(/(\d{2})(\d{3})(\d{3})/, '$1.$2.$3');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -244,10 +254,10 @@ const OwnerList = () => {
                       {owner.cpf ? owner.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {owner.rg || '-'}
+                      {owner.rg ? formatRg(owner.rg) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {owner.celphone || '-'}
+                      {owner.celphone ? formatPhone(owner.celphone) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {owner.email || '-'}

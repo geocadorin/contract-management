@@ -152,6 +152,16 @@ const ContractList = () => {
     return `${contract.real_estates.street || ''}, ${contract.real_estates.number || ''}${contract.real_estates.complement ? `, ${contract.real_estates.complement}` : ''}, ${contract.real_estates.neighborhood || ''}`;
   };
 
+  // Função para formatar telefone
+  const formatPhone = (phone: string) => {
+    return phone.replace(/(\d{2})(\d{1})(\d{4})(\d{4})/, '($1) $2 $3-$4');
+  };
+
+  // Função para formatar RG
+  const formatRg = (rg: string) => {
+    return rg.replace(/(\d{2})(\d{3})(\d{3})/, '$1.$2.$3');
+  };
+
   // Exportar para Excel
   const handleExportToExcel = () => {
     try {
@@ -356,6 +366,12 @@ const ContractList = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
                     Status
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                    RG
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-primary uppercase tracking-wider">
+                    Telefone
+                  </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-primary uppercase tracking-wider">
                     Ações
                   </th>
@@ -392,6 +408,12 @@ const ContractList = () => {
                             'bg-highlight text-light'}`}>
                         {contract.status}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {contract.owners?.rg ? formatRg(contract.owners.rg) : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {contract.owners?.celphone ? formatPhone(contract.owners.celphone) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
