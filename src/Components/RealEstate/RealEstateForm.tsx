@@ -169,6 +169,10 @@ const RealEstateForm = () => {
       setRealEstate(prev => ({ ...prev, [name]: Number(value) }));
     } else if (name === 'city_id') {
       setRealEstate(prev => ({ ...prev, [name]: Number(value) }));
+    } else if (name === 'cep') {
+      // Remover caracteres não numéricos antes de salvar no state
+      const numericValue = value.replace(/\D/g, '');
+      setRealEstate(prev => ({ ...prev, [name]: numericValue }));
     } else if (type === 'checkbox') {
       const checkbox = e.target as HTMLInputElement;
       setRealEstate(prev => ({ ...prev, [name]: checkbox.checked }));
