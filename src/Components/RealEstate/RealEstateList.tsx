@@ -1,26 +1,29 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { RealEstate } from '../../interfaces/RealEstate';
 import { realEstateService } from '../../services/realEstateService';
 import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight, FiHome, FiDownload } from 'react-icons/fi';
 import { exportToExcel, formatRealEstatesForExport } from '../../Utilities/excelExporter';
+import ActionDropdown from '../Common/ActionDropdown';
 
 const RealEstateList = () => {
   const [realEstates, setRealEstates] = useState<RealEstate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [exportLoading, setExportLoading] = useState<boolean>(false);
-  
+
   // Estados para filtros
   const [addressFilter, setAddressFilter] = useState<string>('');
   const [municipalRegistrationFilter, setMunicipalRegistrationFilter] = useState<string>('');
   const [kindFilter, setKindFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
-  
+
   // Estados para paginação
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  
+
+  const navigate = useNavigate();
+
   // Carregar imóveis
   useEffect(() => {
     const fetchRealEstates = async () => {
@@ -37,33 +40,33 @@ const RealEstateList = () => {
         setLoading(false);
       }
     };
-    
+
     fetchRealEstates();
   }, []);
-  
+
   // Filtrar imóveis
-  const filteredRealEstates = realEstates.filter(realEstate => 
-    (addressFilter === '' || 
+  const filteredRealEstates = realEstates.filter(realEstate =>
+    (addressFilter === '' ||
       `${realEstate.street} ${realEstate.number} ${realEstate.neighborhood}`.toLowerCase().includes(addressFilter.toLowerCase())) &&
-    (municipalRegistrationFilter === '' || 
+    (municipalRegistrationFilter === '' ||
       (realEstate.municipal_registration?.toLowerCase() || '').includes(municipalRegistrationFilter.toLowerCase())) &&
     (kindFilter === '' || realEstate.real_estate_kind === kindFilter) &&
     (statusFilter === '' || realEstate.status_real_estate === statusFilter)
   );
-  
+
   // Paginação
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredRealEstates.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredRealEstates.length / itemsPerPage);
-  
+
   // Navegação de páginas
   const goToPage = (pageNumber: number) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
     }
   };
-  
+
   // Limpar filtros
   const clearFilters = () => {
     setAddressFilter('');
@@ -72,13 +75,13 @@ const RealEstateList = () => {
     setStatusFilter('');
     setCurrentPage(1);
   };
-  
+
   // Excluir imóvel
   const handleDelete = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja excluir este imóvel?')) {
       return;
     }
-    
+
     try {
       await realEstateService.delete(id);
       setRealEstates(realEstates.filter(realEstate => realEstate.id !== id));
@@ -87,18 +90,18 @@ const RealEstateList = () => {
       console.error(err);
     }
   };
-  
+
   // Formatar endereço completo
   const formatAddress = (realEstate: RealEstate) => {
     return `${realEstate.street}, ${realEstate.number}${realEstate.complement ? `, ${realEstate.complement}` : ''}, ${realEstate.neighborhood}`;
   };
-  
+
   // Formatar CEP
   const formatCep = (cep: string) => {
     if (!cep) return '';
     return cep.replace(/^(\d{5})(\d{3})$/, '$1-$2');
   };
-  
+
   // Verificar se o imóvel tem as informações de cidade/estado
   const getCityStateInfo = (realEstate: RealEstate) => {
     if (realEstate.cities?.name && realEstate.cities?.states?.uf) {
@@ -106,7 +109,7 @@ const RealEstateList = () => {
     }
     return 'Informação não disponível';
   };
-  
+
   // Exportar para Excel
   const handleExportToExcel = () => {
     try {
@@ -121,7 +124,7 @@ const RealEstateList = () => {
       setExportLoading(false);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -129,7 +132,7 @@ const RealEstateList = () => {
       </div>
     );
   }
-  
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -138,9 +141,8 @@ const RealEstateList = () => {
           <button
             onClick={handleExportToExcel}
             disabled={exportLoading || filteredRealEstates.length === 0}
-            className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${
-              (exportLoading || filteredRealEstates.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${(exportLoading || filteredRealEstates.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
           >
             {exportLoading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
@@ -149,28 +151,28 @@ const RealEstateList = () => {
             )}
             Exportar Excel
           </button>
-          <Link 
-            to="/real-estates/new" 
+          <Link
+            to="/real-estates/new"
             className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
           >
             <FiPlus className="mr-2" /> Novo Imóvel
           </Link>
         </div>
       </div>
-      
+
       {/* Mensagem de erro */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
-      
+
       {/* Filtros */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center">
           <FiSearch className="mr-2" /> Filtros
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
@@ -182,7 +184,7 @@ const RealEstateList = () => {
               onChange={(e) => setAddressFilter(e.target.value)}
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Matrícula</label>
             <input
@@ -193,7 +195,7 @@ const RealEstateList = () => {
               onChange={(e) => setMunicipalRegistrationFilter(e.target.value)}
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
             <select
@@ -209,7 +211,7 @@ const RealEstateList = () => {
               <option value="Galpão">Galpão</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
@@ -225,7 +227,7 @@ const RealEstateList = () => {
             </select>
           </div>
         </div>
-        
+
         <div className="mt-4 flex justify-end">
           <button
             onClick={clearFilters}
@@ -235,7 +237,7 @@ const RealEstateList = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Lista de imóveis */}
       {filteredRealEstates.length > 0 ? (
         <>
@@ -292,34 +294,20 @@ const RealEstateList = () => {
                       <div className="text-sm text-gray-900">{realEstate.owners?.full_name || 'Não especificado'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <Link 
-                        to={`/real-estates/${realEstate.id}`} 
-                        className="text-indigo-600 hover:text-indigo-900 mr-3"
-                        title="Visualizar"
-                      >
-                        <FiEye />
-                      </Link>
-                      <Link 
-                        to={`/real-estates/${realEstate.id}/edit`} 
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                        title="Editar"
-                      >
-                        <FiEdit />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(realEstate.id!)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Excluir"
-                      >
-                        <FiTrash2 />
-                      </button>
+                      <ActionDropdown
+                        actions={[
+                          { label: 'Editar', onClick: () => navigate(`/real-estates/${realEstate.id}/edit`) },
+                          { label: 'Excluir', onClick: () => handleDelete(realEstate.id) },
+                          { label: 'Visualizar', onClick: () => navigate(`/real-estates/${realEstate.id}`) }
+                        ]}
+                      />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          
+
           {/* Paginação */}
           {totalPages > 1 && (
             <div className="flex justify-between items-center mt-4 bg-white p-4 rounded-lg shadow">
@@ -330,39 +318,36 @@ const RealEstateList = () => {
                   </span> de <span className="font-medium">{filteredRealEstates.length}</span> resultados
                 </span>
               </div>
-              
+
               <div className="flex space-x-2">
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`${
-                    currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
-                  } px-3 py-1 border rounded-md`}
+                  className={`${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
+                    } px-3 py-1 border rounded-md`}
                 >
                   <FiChevronLeft />
                 </button>
-                
+
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   const pageNum = i + 1;
                   return (
                     <button
                       key={i}
                       onClick={() => goToPage(pageNum)}
-                      className={`${
-                        currentPage === pageNum ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
-                      } px-3 py-1 border rounded-md`}
+                      className={`${currentPage === pageNum ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                        } px-3 py-1 border rounded-md`}
                     >
                       {pageNum}
                     </button>
                   );
                 })}
-                
+
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`${
-                    currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
-                  } px-3 py-1 border rounded-md`}
+                  className={`${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
+                    } px-3 py-1 border rounded-md`}
                 >
                   <FiChevronRight />
                 </button>

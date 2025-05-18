@@ -1,26 +1,29 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Owner } from '../../interfaces/Person';
 import { ownerService } from '../../services/personService';
 import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight, FiDownload } from 'react-icons/fi';
 import { exportToExcel, formatOwnersForExport } from '../../Utilities/excelExporter';
+import ActionDropdown from '../Common/ActionDropdown';
 
 const OwnerList = () => {
   const [owners, setOwners] = useState<Owner[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [exportLoading, setExportLoading] = useState<boolean>(false);
-  
+
   // Estados para filtros
   const [nameFilter, setNameFilter] = useState<string>('');
   const [cpfFilter, setCpfFilter] = useState<string>('');
   const [rgFilter, setRgFilter] = useState<string>('');
   const [emailFilter, setEmailFilter] = useState<string>('');
-  
+
   // Estados para paginação
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  
+
+  const navigate = useNavigate();
+
   // Carregar proprietários
   useEffect(() => {
     const fetchOwners = async () => {
@@ -36,31 +39,31 @@ const OwnerList = () => {
         setLoading(false);
       }
     };
-    
+
     fetchOwners();
   }, []);
-  
+
   // Filtrar proprietários
-  const filteredOwners = owners.filter(owner => 
+  const filteredOwners = owners.filter(owner =>
     (nameFilter === '' || owner.full_name.toLowerCase().includes(nameFilter.toLowerCase())) &&
     (cpfFilter === '' || owner.cpf?.includes(cpfFilter)) &&
     (rgFilter === '' || owner.rg?.toLowerCase().includes(rgFilter.toLowerCase())) &&
     (emailFilter === '' || owner.email?.toLowerCase().includes(emailFilter.toLowerCase()))
   );
-  
+
   // Paginação
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredOwners.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredOwners.length / itemsPerPage);
-  
+
   // Navegação de páginas
   const goToPage = (pageNumber: number) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
     }
   };
-  
+
   // Limpar filtros
   const clearFilters = () => {
     setNameFilter('');
@@ -69,13 +72,13 @@ const OwnerList = () => {
     setEmailFilter('');
     setCurrentPage(1);
   };
-  
+
   // Excluir proprietário
   const handleDelete = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja excluir este proprietário?')) {
       return;
     }
-    
+
     try {
       await ownerService.delete(id);
       setOwners(owners.filter(owner => owner.id !== id));
@@ -84,7 +87,7 @@ const OwnerList = () => {
       console.error(err);
     }
   };
-  
+
   // Exportar para Excel
   const handleExportToExcel = () => {
     try {
@@ -99,7 +102,7 @@ const OwnerList = () => {
       setExportLoading(false);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -107,7 +110,7 @@ const OwnerList = () => {
       </div>
     );
   }
-  
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -116,9 +119,8 @@ const OwnerList = () => {
           <button
             onClick={handleExportToExcel}
             disabled={exportLoading || filteredOwners.length === 0}
-            className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${
-              (exportLoading || filteredOwners.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${(exportLoading || filteredOwners.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
           >
             {exportLoading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
@@ -127,28 +129,28 @@ const OwnerList = () => {
             )}
             Exportar Excel
           </button>
-          <Link 
-            to="/owners/new" 
+          <Link
+            to="/owners/new"
             className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
           >
             <FiPlus className="mr-2" /> Novo Proprietário
           </Link>
         </div>
       </div>
-      
+
       {/* Mensagem de erro */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
-      
+
       {/* Filtros */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center">
           <FiSearch className="mr-2" /> Filtros
         </h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
@@ -160,7 +162,7 @@ const OwnerList = () => {
               onChange={(e) => setNameFilter(e.target.value)}
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
             <input
@@ -171,7 +173,7 @@ const OwnerList = () => {
               onChange={(e) => setCpfFilter(e.target.value)}
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">RG</label>
             <input
@@ -182,7 +184,7 @@ const OwnerList = () => {
               onChange={(e) => setRgFilter(e.target.value)}
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
             <input
@@ -194,7 +196,7 @@ const OwnerList = () => {
             />
           </div>
         </div>
-        
+
         <div className="mt-4 flex justify-end">
           <button
             onClick={clearFilters}
@@ -204,7 +206,7 @@ const OwnerList = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Lista de proprietários */}
       {filteredOwners.length > 0 ? (
         <>
@@ -250,29 +252,15 @@ const OwnerList = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {owner.email || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium overflow-visible">
                       <div className="flex justify-end space-x-2">
-                        <Link 
-                          to={`/owners/${owner.id}`}
-                          className="text-indigo-600 hover:text-indigo-900"
-                          title="Visualizar"
-                        >
-                          <FiEye />
-                        </Link>
-                        <Link 
-                          to={`/owners/${owner.id}/edit`}
-                          className="text-yellow-600 hover:text-yellow-900"
-                          title="Editar"
-                        >
-                          <FiEdit />
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(owner.id!)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Excluir"
-                        >
-                          <FiTrash2 />
-                        </button>
+                        <ActionDropdown
+                          actions={[
+                            { label: 'Editar', onClick: () => navigate(`/owners/${owner.id}/edit`) },
+                            { label: 'Excluir', onClick: () => handleDelete(owner.id) },
+                            { label: 'Visualizar', onClick: () => navigate(`/owners/${owner.id}`) }
+                          ]}
+                        />
                       </div>
                     </td>
                   </tr>
@@ -280,7 +268,7 @@ const OwnerList = () => {
               </tbody>
             </table>
           </div>
-          
+
           {/* Paginação */}
           <div className="mt-4 flex justify-between items-center">
             <div className="text-sm text-gray-700">
@@ -288,23 +276,22 @@ const OwnerList = () => {
                 {Math.min(indexOfLastItem, filteredOwners.length)}
               </span> de <span className="font-medium">{filteredOwners.length}</span> resultados
             </div>
-            
+
             <div className="flex space-x-2">
               <button
                 onClick={() => goToPage(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 rounded ${
-                  currentPage === 1 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                className={`px-3 py-1 rounded ${currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
               >
                 <FiChevronLeft />
               </button>
-              
+
               {Array.from({ length: Math.min(5, totalPages) }).map((_, index) => {
                 let pageNumber;
-                
+
                 if (totalPages <= 5) {
                   pageNumber = index + 1;
                 } else if (currentPage <= 3) {
@@ -314,17 +301,16 @@ const OwnerList = () => {
                 } else {
                   pageNumber = currentPage - 2 + index;
                 }
-                
+
                 if (pageNumber <= totalPages) {
                   return (
                     <button
                       key={pageNumber}
                       onClick={() => goToPage(pageNumber)}
-                      className={`px-3 py-1 rounded ${
-                        currentPage === pageNumber
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
+                      className={`px-3 py-1 rounded ${currentPage === pageNumber
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
                     >
                       {pageNumber}
                     </button>
@@ -332,24 +318,23 @@ const OwnerList = () => {
                 }
                 return null;
               })}
-              
+
               <button
                 onClick={() => goToPage(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className={`px-3 py-1 rounded ${
-                  currentPage === totalPages 
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
+                className={`px-3 py-1 rounded ${currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
               >
                 <FiChevronRight />
               </button>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-700">Itens por página:</span>
-              <select 
-                value={itemsPerPage} 
+              <select
+                value={itemsPerPage}
                 onChange={(e) => {
                   setItemsPerPage(Number(e.target.value));
                   setCurrentPage(1);
