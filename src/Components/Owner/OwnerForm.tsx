@@ -721,6 +721,22 @@ const OwnerForm = () => {
             </select>
           </div>
 
+          {/* Bairro */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="neighborhood">
+              Bairro
+            </label>
+            <input
+              type="text"
+              id="neighborhood"
+              name="neighborhood"
+              value={owner.neighborhood || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+
           {/* Logradouro */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="street">
@@ -766,20 +782,6 @@ const OwnerForm = () => {
             />
           </div>
 
-          {/* Bairro */}
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="neighborhood">
-              Bairro
-            </label>
-            <input
-              type="text"
-              id="neighborhood"
-              name="neighborhood"
-              value={owner.neighborhood || ''}
-              onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
 
           {/* Observações */}
           <div className="col-span-1 md:col-span-2">
@@ -808,9 +810,9 @@ const OwnerForm = () => {
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="files">
               Upload de Arquivos (PDF, máx. 2MB cada, até 3 arquivos)
             </label>
-            <div className="upload-container">
+            <div className="upload-container w-full">
               <div
-                className={`drop-area ${isDragging ? 'drag-active' : ''}`}
+                className={`drop-area ${isDragging ? 'drag-active' : ''} w-full flex items-center justify-center border-2 border-dashed border-gray-300 rounded-md`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -825,7 +827,7 @@ const OwnerForm = () => {
                   ref={fileInputRef}
                 />
               </div>
-              <button type="button" onClick={() => fileInputRef.current?.click()}>
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="mt-2">
                 Selecionar Arquivos
               </button>
             </div>
