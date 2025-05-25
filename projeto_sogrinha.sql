@@ -2,35 +2,45 @@
 -- Exemplo para PostgreSQL:
 CREATE TYPE person_role AS ENUM ('OWNER', 'LESSEE');
 
+-- TABLE persons
 CREATE TABLE persons (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    role person_role NOT NULL, -- Ou VARCHAR(10) NOT NULL CHECK (role IN ('OWNER', 'LESSEE')) se não usar ENUM
-    -- user_id UUID, -- Se o conceito de user_id se aplicar a ambos e referenciar uma tabela 'users'
-    full_name VARCHAR(255) NOT NULL,
-    marital_status_id SMALLINT,
-    profession VARCHAR(100),
-    rg VARCHAR(20),
-    issuing_body VARCHAR(50),
-    cpf VARCHAR(11) UNIQUE, -- Apenas números.
-    celphone VARCHAR(20), -- Apenas números
-    email VARCHAR(255), -- Considerar se o email deve ser UNIQUE em toda a tabela persons
-
-    -- Endereço
-    cep VARCHAR(10), -- Apenas números
-    street VARCHAR(300),
-    number VARCHAR(20),
-    complement VARCHAR(50),
-    neighborhood VARCHAR(255),
-    city_id INTEGER,
-
+    role VARCHAR,
+    full_name VARCHAR,
+    marital_status_id INT,
+    profession VARCHAR,
+    rg VARCHAR,
+    issuing_body VARCHAR,
+    cpf VARCHAR,
+    cellphone VARCHAR,
+    email VARCHAR,
+    cep VARCHAR,
+    street VARCHAR,
+    number VARCHAR,
+    complement VARCHAR,
+    neighborhood VARCHAR,
+    city_id INT,
     note TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW(),
-
-    CONSTRAINT uq_persons_email UNIQUE (email), -- Se o email deve ser único para todas as pessoas
-    CONSTRAINT fk_persons_marital_status FOREIGN KEY (marital_status_id) REFERENCES marital_statuses(id),
-    CONSTRAINT fk_persons_city FOREIGN KEY (city_id) REFERENCES cities(id)
-    -- CONSTRAINT fk_persons_user FOREIGN KEY (user_id) REFERENCES users(id) -- Se aplicável
+    created_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ,
+    uf_rg VARCHAR,
+    gender VARCHAR,
+    nationality VARCHAR,
+    branch VARCHAR,
+    account VARCHAR,
+    bank VARCHAR,
+    account_type VARCHAR,
+    opted_for_power_of_attorney BOOLEAN,
+    
+	CONSTRAINT uq_persons_email UNIQUE (email),
+	
+    CONSTRAINT fk_persons_marital_status
+        FOREIGN KEY (marital_status_id)
+        REFERENCES public.marital_statuses(id),
+    
+    CONSTRAINT fk_persons_city
+        FOREIGN KEY (city_id)
+        REFERENCES public.cities(id)
 );
 
 -- Índices para a tabela persons
@@ -88,6 +98,22 @@ FOR EACH ROW
 EXECUTE FUNCTION trigger_set_timestamp();
 
 
+-- Table person_reference
+CREATE TABLE person_reference (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR,
+    telefone VARCHAR,
+    endereco_completo VARCHAR,
+    cep VARCHAR,
+    person_id UUID,
+    kinship VARCHAR,
+
+    CONSTRAINT fk_person_reference_person
+        FOREIGN KEY (person_id)
+        REFERENCES persons(id)
+);
+
+
 -- Tabela para Estados Civis (Exemplo)
 CREATE TABLE marital_statuses (
     id SMALLSERIAL PRIMARY KEY,
@@ -112,15 +138,22 @@ CREATE TABLE cities (
 );
 
 
--- First, create the ENUM types for realEstateKind and statusRealEstate
--- These should be created before the table that uses them.
-
-CREATE TYPE real_estate_kind_enum AS ENUM (
+-- Categoria do imóvel
+CREATE TYPE property_category_enum AS ENUM (
     'Casa',
     'Apartamento',
-    'Salas comerciais',
+    'Kitnet',
+    'Sala Comercial',
     'Loja',
-    'Galpão'
+    'Galpão',
+    'Terreno',
+    'Prédio Comercial'
+);
+
+-- Tipo do imóvel
+CREATE TYPE real_estate_kind_enum AS ENUM (
+    'Residencial',
+    'Não Residencial'
 );
 
 CREATE TYPE status_real_estate_enum AS ENUM (
@@ -148,6 +181,10 @@ CREATE TABLE real_estates (
     has_inspection BOOLEAN DEFAULT FALSE,
     status_real_estate status_real_estate_enum NOT NULL,
     has_proof_document BOOLEAN DEFAULT FALSE,
+    energy_concessionaire VARCHAR,
+    water_concessionaire VARCHAR,
+    property_category property_category_enum,
+    inspection_report_date DATE,
 
     owner_id UUID NOT NULL, -- Foreign key to the 'persons' table (the owner)
     lessee_id UUID, -- Foreign key to the 'persons' table (the lessee, optional)
@@ -263,6 +300,13 @@ CREATE TYPE contract_status_enum AS ENUM (
     'Cancelado'
 );
 
+-- Origem do contrato
+CREATE TYPE contract_origin_enum AS ENUM (
+    'Exclusivo',
+    'Compartilhado: Divisão por 2',
+    'Compartilhado: Divisão por 3'
+);
+
 -- Agora, crie a tabela contracts
 CREATE TABLE contracts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -282,6 +326,10 @@ CREATE TABLE contracts (
     owner_id UUID NOT NULL, -- Chave estrangeira para a tabela 'persons' (o proprietário/vendedor/locador)
     lessee_id UUID, -- Chave estrangeira para a tabela 'persons' (o inquilino/comprador, opcional dependendo do contrato)
     real_estate_id UUID NOT NULL, -- Chave estrangeira para a tabela 'real_estates'
+
+    extra_fees_details FLOAT8,
+    contract_signing_date DATE,
+    contract_origin contract_origin_enum,
 
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
