@@ -1,5 +1,5 @@
 import { supabase } from '../SuperbaseConfig/supabaseClient';
-import { Person, Owner, Lessee, PersonPartner } from '../interfaces/Person';
+import { Person, Owner, Lessee, PersonPartner, PersonReference } from '../interfaces/Person';
 
 // Serviços genéricos para Person
 export const personService = {
@@ -141,6 +141,67 @@ export const personService = {
 
     if (error) {
       console.error('Erro ao excluir parceiro:', error);
+      throw error;
+    }
+  },
+
+  // Buscar referências de uma pessoa
+  async getReferences(personId: string): Promise<PersonReference[]> {
+    const { data, error } = await supabase
+      .from('person_reference')
+      .select('*')
+      .eq('person_id', personId);
+
+    if (error) {
+      console.error('Erro ao buscar referências:', error);
+      throw error;
+    }
+
+    return data || [];
+  },
+
+  // Criar referência para uma pessoa
+  async createReference(reference: PersonReference): Promise<PersonReference> {
+    const { data, error } = await supabase
+      .from('person_reference')
+      .insert([reference])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao criar referência:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  // Atualizar referência
+  async updateReference(id: string, reference: Partial<PersonReference>): Promise<PersonReference> {
+    const { data, error } = await supabase
+      .from('person_reference')
+      .update(reference)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao atualizar referência:', error);
+      throw error;
+    }
+
+    return data;
+  },
+
+  // Excluir referência
+  async deleteReference(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('person_reference')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erro ao excluir referência:', error);
       throw error;
     }
   }

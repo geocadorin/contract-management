@@ -1,0 +1,87 @@
+/* Estilos globais para inputs com foco azul */
+
+/* Força aplicação dos estilos de foco para todos os inputs, selects e textareas */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Estilos específicos para inputs com classes antigas */
+.shadow.appearance-none.border.rounded:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Estilos para InputMask */
+input[class*="shadow appearance-none border rounded"]:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Classe para inputs padrão com foco azul */
+.form-input {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  appearance: none;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: #374151;
+  line-height: 1.25;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-input:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Classe para selects padrão com foco azul */
+.form-select {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  appearance: none;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: #374151;
+  line-height: 1.25;
+  transition: all 0.2s ease-in-out;
+}
+
+.form-select:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Classe para textareas padrão com foco azul */
+.form-textarea {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  appearance: none;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  color: #374151;
+  line-height: 1.25;
+  transition: all 0.2s ease-in-out;
+  resize: none;
+}
+
+.form-textarea:focus {
+  outline: none !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+ 

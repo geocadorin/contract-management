@@ -14,24 +14,24 @@ const ContractDetail = () => {
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [exportLoading, setExportLoading] = useState<{pdf: boolean, docx: boolean, professionalPdf: boolean}>({
-    pdf: false, 
-    docx: false, 
+  const [exportLoading, setExportLoading] = useState<{ pdf: boolean, docx: boolean, professionalPdf: boolean }>({
+    pdf: false,
+    docx: false,
     professionalPdf: false
   });
-  
+
   useEffect(() => {
     const fetchContract = async () => {
       if (!id) return;
-      
+
       try {
         setLoading(true);
         const data = await contractService.getById(id);
-        
+
         if (!data) {
           throw new Error('Contrato não encontrado');
         }
-        
+
         setContract(data);
         setError(null);
       } catch (err) {
@@ -41,100 +41,100 @@ const ContractDetail = () => {
         setLoading(false);
       }
     };
-    
+
     fetchContract();
   }, [id]);
-  
+
   // Formatar valor monetário
   const formatCurrency = (value?: number) => {
     if (value === undefined || value === null) return '-';
-    
-    return new Intl.NumberFormat('pt-BR', { 
-      style: 'currency', 
-      currency: 'BRL' 
+
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
     }).format(value);
   };
-  
+
   // Formatar data
   const formatDate = (dateString?: string) => {
     if (!dateString) return '-';
-    
+
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
   };
-  
+
   // Obter status do contrato com estilo visual
   const getStatusBadge = (status?: string) => {
     if (!status) return null;
-    
+
     const statusClasses = {
       'Ativo': 'bg-green-100 text-green-800',
       'Concluído': 'bg-highlight text-light',
       'Cancelado': 'bg-red-100 text-red-800'
     };
-    
+
     const statusClass = statusClasses[status as keyof typeof statusClasses] || 'bg-gray-100 text-gray-800';
-    
+
     return (
       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}`}>
         {status}
       </span>
     );
   };
-  
+
   // Obter endereço do imóvel
   const getRealEstateAddress = () => {
     if (!contract?.real_estates) {
       return 'Não especificado';
     }
-    
+
     const street = contract.real_estates.street || '';
     const number = contract.real_estates.number || '';
     const complement = contract.real_estates.complement ? `, ${contract.real_estates.complement}` : '';
     const neighborhood = contract.real_estates.neighborhood || '';
-    
+
     return `${street}, ${number}${complement}, ${neighborhood}`;
   };
-  
+
   const handleExportPdf = () => {
     if (!contract) return;
-    setExportLoading(prev => ({...prev, pdf: true}));
+    setExportLoading(prev => ({ ...prev, pdf: true }));
     try {
       generateContractPdf(contract);
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
       alert('Erro ao gerar o PDF. Por favor, tente novamente.');
     } finally {
-      setExportLoading(prev => ({...prev, pdf: false}));
+      setExportLoading(prev => ({ ...prev, pdf: false }));
     }
   };
 
   const handleExportDocx = () => {
     if (!contract) return;
-    setExportLoading(prev => ({...prev, docx: true}));
+    setExportLoading(prev => ({ ...prev, docx: true }));
     try {
       generateContractDocx(contract);
     } catch (error) {
       console.error('Erro ao gerar DOCX:', error);
       alert('Erro ao gerar o documento DOCX. Por favor, tente novamente.');
     } finally {
-      setExportLoading(prev => ({...prev, docx: false}));
+      setExportLoading(prev => ({ ...prev, docx: false }));
     }
   };
 
   const handleExportProfessionalContract = () => {
     if (!contract) return;
-    setExportLoading(prev => ({...prev, professionalPdf: true}));
+    setExportLoading(prev => ({ ...prev, professionalPdf: true }));
     try {
       generateProfessionalContractPdf(contract);
     } catch (error) {
       console.error('Erro ao gerar contrato profissional:', error);
       alert('Erro ao gerar o contrato profissional. Por favor, tente novamente.');
     } finally {
-      setExportLoading(prev => ({...prev, professionalPdf: false}));
+      setExportLoading(prev => ({ ...prev, professionalPdf: false }));
     }
   };
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -142,7 +142,7 @@ const ContractDetail = () => {
       </div>
     );
   }
-  
+
   if (error || !contract) {
     return (
       <div className="p-4">
@@ -158,7 +158,7 @@ const ContractDetail = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -208,7 +208,7 @@ const ContractDetail = () => {
           </Link>
         </div>
       </div>
-      
+
       <div className="bg-white shadow-md rounded-lg overflow-hidden mb-6">
         {/* Cabeçalho do contrato */}
         <div className="p-6 bg-gray-50 border-b border-gray-200">
@@ -227,13 +227,13 @@ const ContractDetail = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Informações básicas */}
         <div className="p-6">
           <h2 className="text-xl font-semibold text-primary mb-4 flex items-center">
             <FiHome className="mr-2" /> Informações Básicas
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
               <p className="text-sm font-medium text-gray-500">Proprietário</p>
@@ -242,7 +242,7 @@ const ContractDetail = () => {
                 {contract.owners?.full_name || 'Não especificado'}
               </p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-500">Inquilino</p>
               <p className="text-gray-800 flex items-center mt-1">
@@ -250,7 +250,7 @@ const ContractDetail = () => {
                 {contract.lessees?.full_name || 'Não especificado'}
               </p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-500">Tipo de Imóvel</p>
               <p className="text-gray-800 flex items-center mt-1">
@@ -258,14 +258,14 @@ const ContractDetail = () => {
                 {contract.real_estates?.real_estate_kind || 'Não especificado'}
               </p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-500">Endereço do Imóvel</p>
               <p className="text-gray-800 mt-1">
                 {getRealEstateAddress()}
               </p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-500">Matrícula do Imóvel</p>
               <p className="text-gray-800 mt-1">
@@ -273,12 +273,12 @@ const ContractDetail = () => {
               </p>
             </div>
           </div>
-          
+
           {/* Período e pagamento */}
           <h2 className="text-xl font-semibold text-primary mb-4 flex items-center">
             <FiCalendar className="mr-2" /> Período e Pagamento
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div>
               <p className="text-sm font-medium text-gray-500">Período do Contrato</p>
@@ -287,14 +287,14 @@ const ContractDetail = () => {
                 {formatDate(contract.start_date)} a {formatDate(contract.end_date)}
               </p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-500">Duração (meses)</p>
               <p className="text-gray-800 mt-1">
                 {contract.duration || '-'}
               </p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-500">Valor do Pagamento</p>
               <p className="text-gray-800 flex items-center mt-1">
@@ -302,11 +302,35 @@ const ContractDetail = () => {
                 {formatCurrency(contract.payment_value)}
               </p>
             </div>
-            
+
             <div>
               <p className="text-sm font-medium text-gray-500">Dia de Pagamento</p>
               <p className="text-gray-800 mt-1">
                 {contract.day_payment || '-'} de cada mês
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-gray-500">Taxas Extras</p>
+              <p className="text-gray-800 flex items-center mt-1">
+                <FiDollarSign className="mr-2 text-gray-400" />
+                {formatCurrency(contract.extra_fees_details)}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-gray-500">Data de Assinatura</p>
+              <p className="text-gray-800 flex items-center mt-1">
+                <FiCalendar className="mr-2 text-gray-400" />
+                {formatDate(contract.contract_signing_date)}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-gray-500">Origem do Contrato</p>
+              <p className="text-gray-800 flex items-center mt-1">
+                <FiTag className="mr-2 text-gray-400" />
+                {contract.contract_origin || '-'}
               </p>
             </div>
           </div>

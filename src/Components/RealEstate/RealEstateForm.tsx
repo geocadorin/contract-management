@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { RealEstate, RealEstateKind, StatusRealEstate } from '../../interfaces/RealEstate';
+import { RealEstate } from '../../interfaces/RealEstate';
+import { RealEstateKind, StatusRealEstate, PropertyCategory } from '../../interfaces/Enums';
 import { realEstateService } from '../../services/realEstateService';
 import { locationService } from '../../services/locationService';
 import { State, City, Owner, Lessee } from '../../interfaces/Person';
@@ -21,11 +22,15 @@ const initialRealEstateState: Omit<RealEstate, 'id' | 'created_at' | 'updated_at
   complement: '',
   cep: '',
   note: '',
-  real_estate_kind: 'Casa',
+  real_estate_kind: 'Residencial',
   has_inspection: false,
   status_real_estate: 'Disponível',
   has_proof_document: false,
-  owner_id: ''
+  owner_id: '',
+  energy_concessionaire: '',
+  water_concessionaire: '',
+  property_category: 'Casa',
+  inspection_report_date: '',
 };
 
 // Tipo para arquivos armazenados
@@ -57,8 +62,9 @@ const RealEstateForm = () => {
   const [cepError, setCepError] = useState<string | null>(null);
 
   // Tipos de imóveis e status disponíveis
-  const realEstateKinds: RealEstateKind[] = ['Casa', 'Apartamento', 'Salas comerciais', 'Loja', 'Galpão'];
+  const realEstateKinds: RealEstateKind[] = ['Residencial', 'Não Residencial'];
   const statusRealEstates: StatusRealEstate[] = ['Disponível', 'Alugado', 'Vendido', 'Cancelado'];
+  const propertyCategories: PropertyCategory[] = ['Casa', 'Apartamento', 'Kitnet', 'Sala Comercial', 'Loja', 'Galpão', 'Terreno', 'Prédio Comercial'];
 
   // Estado para arquivos
   const [files, setFiles] = useState<File[]>([]);
@@ -176,6 +182,8 @@ const RealEstateForm = () => {
     } else if (type === 'checkbox') {
       const checkbox = e.target as HTMLInputElement;
       setRealEstate(prev => ({ ...prev, [name]: checkbox.checked }));
+    } else if (name === 'inspection_report_date') {
+      setRealEstate(prev => ({ ...prev, [name]: value }));
     } else {
       setRealEstate(prev => ({ ...prev, [name]: value }));
     }
@@ -482,6 +490,23 @@ const RealEstateForm = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
+                Categoria do Imóvel
+              </label>
+              <select
+                name="property_category"
+                value={realEstate.property_category || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Selecione uma categoria</option>
+                {propertyCategories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Status <span className="text-red-500">*</span>
               </label>
               <select
@@ -499,14 +524,14 @@ const RealEstateForm = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Matrícula
+                Inscrição Municipal
               </label>
               <input
                 type="text"
                 name="municipal_registration"
                 value={realEstate.municipal_registration || ''}
                 onChange={handleChange}
-                placeholder="Número da matrícula"
+                placeholder="Número da inscrição municipal"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -704,6 +729,51 @@ const RealEstateForm = () => {
                 value={realEstate.complement || ''}
                 onChange={handleChange}
                 placeholder="Apartamento, Bloco, etc."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Seção: Informações Adicionais */}
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Informações Adicionais</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Concessionária de Energia
+              </label>
+              <input
+                type="text"
+                name="energy_concessionaire"
+                value={realEstate.energy_concessionaire || ''}
+                onChange={handleChange}
+                placeholder="Nome da concessionária de energia"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Concessionária de Água
+              </label>
+              <input
+                type="text"
+                name="water_concessionaire"
+                value={realEstate.water_concessionaire || ''}
+                onChange={handleChange}
+                placeholder="Nome da concessionária de água"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Data do Relatório de Vistoria
+              </label>
+              <input
+                type="date"
+                name="inspection_report_date"
+                value={realEstate.inspection_report_date || ''}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>

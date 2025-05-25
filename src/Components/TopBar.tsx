@@ -9,23 +9,27 @@ const TopBar = () => {
   const navigate = useNavigate();
   const [isSearchMenuOpen, setIsSearchMenuOpen] = useState(false);
   const [isRegisterMenuOpen, setIsRegisterMenuOpen] = useState(false);
-  
+
   // Função para logout
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
-      navigate('/login');
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+
+      // Forçar recarregamento da página para limpar completamente o estado
+      window.location.href = '/login';
     } catch (err) {
       console.error('Erro ao fazer logout:', err);
+      alert('Não foi possível fazer logout. Tente novamente.');
     }
   };
-  
+
   // Fechar menus quando um item for clicado
   const handleItemClick = () => {
     setIsSearchMenuOpen(false);
     setIsRegisterMenuOpen(false);
   };
-  
+
   return (
     <div className="bg-primary text-light shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,15 +37,15 @@ const TopBar = () => {
           {/* Logo e nome do sistema */}
           <div className="flex">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <img 
-                src={logoImg} 
-                alt="Sogrinha Gestão de Contratos" 
+              <img
+                src={logoImg}
+                alt="Sogrinha Gestão de Contratos"
                 className="h-10 w-auto"
               />
               <span className="ml-2 text-xl font-bold text-light">Gestão de Contratos</span>
             </Link>
           </div>
-          
+
           {/* Itens de navegação */}
           <div className="flex items-center">
             {/* Menu de Busca */}
@@ -56,7 +60,7 @@ const TopBar = () => {
                 <FiSearch className="mr-2" />
                 <span>Buscar</span>
               </button>
-              
+
               {/* Dropdown de Busca */}
               {isSearchMenuOpen && (
                 <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
@@ -93,7 +97,7 @@ const TopBar = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Menu de Cadastro */}
             <div className="relative ml-3">
               <button
@@ -106,7 +110,7 @@ const TopBar = () => {
                 <FiPlus className="mr-2" />
                 <span>Cadastrar</span>
               </button>
-              
+
               {/* Dropdown de Cadastro */}
               {isRegisterMenuOpen && (
                 <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
@@ -143,7 +147,7 @@ const TopBar = () => {
                 </div>
               )}
             </div>
-            
+
             {/* Botão de Logout */}
             <button
               onClick={handleLogout}

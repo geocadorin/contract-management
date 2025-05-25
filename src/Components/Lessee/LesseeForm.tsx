@@ -7,25 +7,38 @@ import { MaritalStatus, State, City } from '../../interfaces/Person';
 import { FiSave, FiArrowLeft, FiSearch } from 'react-icons/fi';
 import InputMask from 'react-input-mask';
 import { supabase } from '../../SuperbaseConfig/supabaseClient';
+
 import './LesseeForm.css'; // Importar o CSS para estilos
+import '../Common/FormStyles.css'; // Importar estilos globais de formulário
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Inicializador para formulário vazio
-const initialLesseeState: Omit<Lessee, 'role'> = {
+const initialLesseeState: Omit<Lessee, 'id' | 'created_at' | 'updated_at'> = {
+  role: 'LESSEE',
   full_name: '',
-  cpf: '',
+  marital_status_id: 0,
+  profession: '',
   rg: '',
   issuing_body: '',
-  profession: '',
-  celphone: '',
+  cpf: '',
+  cellphone: '',
   email: '',
-  marital_status_id: undefined,
   cep: '',
   street: '',
   number: '',
   complement: '',
   neighborhood: '',
-  city_id: undefined,
-  note: ''
+  city_id: 0,
+  note: '',
+  uf_rg: '',
+  gender: '',
+  nationality: '',
+  branch: '',
+  account: '',
+  bank: '',
+  account_type: '',
+  opted_for_power_of_attorney: false,
 };
 
 // Tipo para arquivos armazenados
@@ -166,6 +179,11 @@ const LesseeForm = () => {
       setSelectedStateId(value ? Number(value) : undefined);
     } else if (name === 'city_id' || name === 'marital_status_id') {
       setLessee(prev => ({ ...prev, [name]: value ? Number(value) : undefined }));
+    } else if (name === 'opted_for_power_of_attorney' && e.target instanceof HTMLInputElement) {
+      const input = e.target as HTMLInputElement;
+      setLessee(prev => ({ ...prev, [name]: input.checked }));
+    } else if (name === 'uf_rg') {
+      setLessee(prev => ({ ...prev, [name]: value }));
     } else {
       setLessee(prev => ({ ...prev, [name]: value }));
     }
@@ -396,13 +414,40 @@ const LesseeForm = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    // Verificar campos obrigatórios
+    const missingFields = [];
+    if (!lessee.cep) missingFields.push('CEP');
+    if (!lessee.street) missingFields.push('Logradouro');
+    if (!lessee.number) missingFields.push('Número');
+    if (!lessee.neighborhood) missingFields.push('Bairro');
+    if (!lessee.city_id) missingFields.push('Cidade');
+    if (!lessee.cellphone) missingFields.push('Telefone/Celular');
+    if (!lessee.email) missingFields.push('E-mail');
+    if (!lessee.rg) missingFields.push('RG');
+    if (!lessee.issuing_body) missingFields.push('Órgão Emissor');
+    if (!lessee.uf_rg) missingFields.push('UF do RG');
+
+    if (missingFields.length > 0) {
+      toast.error(`Os seguintes campos são obrigatórios: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    // Verificar se o UF do RG tem mais de 2 caracteres
+    if (lessee.uf_rg.length > 2) {
+      toast.error('O campo UF do RG não pode conter mais de 2 caracteres.');
+      return;
+    }
+
+    // Certificar-se de que o UF do RG está em maiúsculas
+    const lesseeData = { ...lessee, uf_rg: lessee.uf_rg.toUpperCase() };
+
     // Validação básica
-    if (!lessee.full_name || !lessee.full_name.trim()) {
+    if (!lesseeData.full_name || !lesseeData.full_name.trim()) {
       setError('Nome completo é obrigatório');
       return;
     }
 
-    if (!lessee.cpf || lessee.cpf.length !== 11) {
+    if (!lesseeData.cpf || lesseeData.cpf.length !== 11) {
       setError('CPF inválido. Deve conter 11 dígitos');
       return;
     }
@@ -414,12 +459,12 @@ const LesseeForm = () => {
       let lesseeId = id;
 
       // Remover propriedades não primitivas ou calculadas
-      const { cities, states, ...lesseeData } = lessee as any;
+      const { cities, states, ...lesseeDataToSend } = lesseeData as any;
 
       if (isEditMode && id) {
-        await lesseeService.update(id, lesseeData);
+        await lesseeService.update(id, lesseeDataToSend);
       } else {
-        const newLessee = await lesseeService.create(lesseeData);
+        const newLessee = await lesseeService.create(lesseeDataToSend);
         setLessee(newLessee);
         lesseeId = newLessee.id;
       }
@@ -486,7 +531,7 @@ const LesseeForm = () => {
               name="full_name"
               value={lessee.full_name}
               onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               required
             />
           </div>
@@ -501,7 +546,7 @@ const LesseeForm = () => {
               name="marital_status_id"
               value={lessee.marital_status_id || ''}
               onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             >
               <option value="">Selecione...</option>
               {maritalStatuses.map(status => (
@@ -523,7 +568,7 @@ const LesseeForm = () => {
               name="profession"
               value={lessee.profession || ''}
               onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             />
           </div>
 
@@ -551,7 +596,7 @@ const LesseeForm = () => {
           {/* RG */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="rg">
-              RG
+              RG *
             </label>
             <InputMask
               mask="99.999.999-9"
@@ -561,7 +606,7 @@ const LesseeForm = () => {
               value={lessee.rg || ''}
               onChange={(e) => {
                 // Salvar com a máscara removida
-                const value = e.target.value.replace(/[^\d]/g, '');
+                const value = e.target.value.replace(/[^ -]+/g, '');
                 setLessee(prev => ({ ...prev, rg: value }));
               }}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -571,7 +616,7 @@ const LesseeForm = () => {
           {/* Órgão Emissor */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="issuing_body">
-              Órgão Emissor
+              Órgão Emissor *
             </label>
             <input
               type="text"
@@ -580,6 +625,133 @@ const LesseeForm = () => {
               value={lessee.issuing_body || ''}
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* UF do RG */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="uf_rg">
+              UF do RG *
+            </label>
+            <input
+              type="text"
+              id="uf_rg"
+              name="uf_rg"
+              value={lessee.uf_rg || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Gênero */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="gender">
+              Gênero
+            </label>
+            <select
+              id="gender"
+              name="gender"
+              value={lessee.gender || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            >
+              <option value="">Selecione...</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          {/* Nacionalidade */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nationality">
+              Nacionalidade
+            </label>
+            <input
+              type="text"
+              id="nationality"
+              name="nationality"
+              value={lessee.nationality || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Agência Bancária */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="branch">
+              Agência Bancária
+            </label>
+            <input
+              type="text"
+              id="branch"
+              name="branch"
+              value={lessee.branch || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Número da Conta */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="account">
+              Número da Conta
+            </label>
+            <input
+              type="text"
+              id="account"
+              name="account"
+              value={lessee.account || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Nome do Banco */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="bank">
+              Nome do Banco
+            </label>
+            <input
+              type="text"
+              id="bank"
+              name="bank"
+              value={lessee.bank || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Tipo de Conta */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="account_type">
+              Tipo de Conta
+            </label>
+            <select
+              id="account_type"
+              name="account_type"
+              value={lessee.account_type || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            >
+              <option value="">Selecione...</option>
+              <option value="Corrente">Corrente</option>
+              <option value="Poupança">Poupança</option>
+            </select>
+          </div>
+
+          {/* Optou por Procuração */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="opted_for_power_of_attorney">
+              Optou por Procuração
+            </label>
+            <input
+              type="checkbox"
+              id="opted_for_power_of_attorney"
+              name="opted_for_power_of_attorney"
+              checked={lessee.opted_for_power_of_attorney || false}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
 
@@ -592,19 +764,19 @@ const LesseeForm = () => {
 
           {/* Celular */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="celphone">
-              Telefone/Celular
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="cellphone">
+              Telefone/Celular *
             </label>
             <InputMask
               mask="(99) 99999-9999"
               type="text"
-              id="celphone"
-              name="celphone"
-              value={lessee.celphone || ''}
+              id="cellphone"
+              name="cellphone"
+              value={lessee.cellphone || ''}
               onChange={(e) => {
                 // Remover caracteres não numéricos
                 const numericValue = e.target.value.replace(/\D/g, '');
-                setLessee(prev => ({ ...prev, celphone: numericValue }));
+                setLessee(prev => ({ ...prev, cellphone: numericValue }));
               }}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
@@ -613,7 +785,7 @@ const LesseeForm = () => {
           {/* Email */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-              E-mail
+              E-mail *
             </label>
             <input
               type="email"
@@ -635,7 +807,7 @@ const LesseeForm = () => {
           {/* CEP */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="cep">
-              CEP
+              CEP *
             </label>
             <div className="flex">
               <InputMask
@@ -698,7 +870,7 @@ const LesseeForm = () => {
           {/* Cidade */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="city_id">
-              Cidade
+              Cidade *
             </label>
             <select
               id="city_id"
@@ -717,10 +889,25 @@ const LesseeForm = () => {
             </select>
           </div>
 
+          {/* Bairro */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="neighborhood">
+              Bairro *
+            </label>
+            <input
+              type="text"
+              id="neighborhood"
+              name="neighborhood"
+              value={lessee.neighborhood || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
           {/* Logradouro */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="street">
-              Logradouro
+              Logradouro *
             </label>
             <input
               type="text"
@@ -735,7 +922,7 @@ const LesseeForm = () => {
           {/* Número */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="number">
-              Número
+              Número *
             </label>
             <input
               type="text"
@@ -762,20 +949,7 @@ const LesseeForm = () => {
             />
           </div>
 
-          {/* Bairro */}
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="neighborhood">
-              Bairro
-            </label>
-            <input
-              type="text"
-              id="neighborhood"
-              name="neighborhood"
-              value={lessee.neighborhood || ''}
-              onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
+
 
           {/* Observações */}
           <div className="col-span-1 md:col-span-2">
@@ -889,6 +1063,8 @@ const LesseeForm = () => {
           </div>
         </div>
 
+
+
         {/* Botões de ação */}
         <div className="flex justify-end mt-6">
           <button
@@ -917,6 +1093,8 @@ const LesseeForm = () => {
           </button>
         </div>
       </form>
+
+      <ToastContainer aria-label="Notificações" />
     </div>
   );
 };

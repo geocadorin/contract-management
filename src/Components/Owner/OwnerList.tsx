@@ -256,8 +256,8 @@ const OwnerList = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {owner.rg ? formatRg(owner.rg) : '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {owner.celphone ? formatPhone(owner.celphone) : '-'}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {owner.cellphone ? formatPhone(owner.cellphone) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {owner.email || '-'}

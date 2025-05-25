@@ -196,10 +196,10 @@ const RealEstateList = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Matrícula</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Inscrição Municipal</label>
             <input
               type="text"
-              placeholder="Filtrar por matrícula"
+              placeholder="Filtrar por inscrição municipal"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={municipalRegistrationFilter}
               onChange={(e) => setMunicipalRegistrationFilter(e.target.value)}
@@ -259,7 +259,7 @@ const RealEstateList = () => {
                     Endereço
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Matrícula
+                    Inscrição Municipal
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Tipo
@@ -313,7 +313,7 @@ const RealEstateList = () => {
                       {realEstate.owners?.rg ? formatRg(realEstate.owners.rg) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {realEstate.owners?.celphone ? formatPhone(realEstate.owners.celphone) : '-'}
+                      {realEstate.owners?.cellphone ? formatPhone(realEstate.owners.cellphone) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <ActionDropdown

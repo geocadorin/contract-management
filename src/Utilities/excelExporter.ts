@@ -15,15 +15,15 @@ export const exportToExcel = <T extends Record<string, any>>(
   try {
     // Criar uma planilha usando a biblioteca XLSX
     const worksheet = XLSX.utils.json_to_sheet(data);
-    
+
     // Criar um workbook e adicionar a planilha
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-    
+
     // Gerar o arquivo e salvar
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    
+
     // Salvar o arquivo
     saveAs(blob, `${fileName}.xlsx`);
   } catch (error) {
@@ -45,7 +45,7 @@ export const formatOwnersForExport = (owners: any[]) => {
       'RG': owner.rg || '',
       'Órgão Emissor': owner.issuing_body || '',
       'Profissão': owner.profession || '',
-      'Telefone': owner.celphone || '',
+      'Telefone': owner.cellphone || '',
       'Email': owner.email || '',
       'CEP': owner.cep || '',
       'Rua': owner.street || '',
@@ -72,7 +72,7 @@ export const formatLesseesForExport = (lessees: any[]) => {
       'RG': lessee.rg || '',
       'Órgão Emissor': lessee.issuing_body || '',
       'Profissão': lessee.profession || '',
-      'Telefone': lessee.celphone || '',
+      'Telefone': lessee.cellphone || '',
       'Email': lessee.email || '',
       'CEP': lessee.cep || '',
       'Rua': lessee.street || '',
@@ -93,7 +93,7 @@ export const formatLesseesForExport = (lessees: any[]) => {
  */
 const getMartialStatusName = (id?: number): string => {
   if (!id) return '';
-  
+
   const maritalStatuses: Record<number, string> = {
     1: 'Solteiro(a)',
     2: 'Casado(a)',
@@ -102,7 +102,7 @@ const getMartialStatusName = (id?: number): string => {
     5: 'União Estável',
     6: 'Separado(a)',
   };
-  
+
   return maritalStatuses[id] || '';
 };
 
@@ -114,7 +114,7 @@ const getMartialStatusName = (id?: number): string => {
 export const formatRealEstatesForExport = (realEstates: any[]) => {
   return realEstates.map(realEstate => ({
     'Tipo': realEstate.real_estate_kind || '',
-    'Matrícula': realEstate.municipal_registration || '',
+    'Inscrição Municipal': realEstate.municipal_registration || '',
     'Status': realEstate.status_real_estate || '',
     'CEP': realEstate.cep || '',
     'Rua': realEstate.street || '',

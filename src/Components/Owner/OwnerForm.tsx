@@ -7,25 +7,37 @@ import { MaritalStatus, State, City } from '../../interfaces/Person';
 import { FiSave, FiArrowLeft, FiSearch } from 'react-icons/fi';
 import InputMask from 'react-input-mask';
 import { supabase } from '../../SuperbaseConfig/supabaseClient';
+
 import './OwnerForm.css'; // Importar o CSS para estilos
+import '../Common/FormStyles.css'; // Importar estilos globais de formulário
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Inicializador para formulário vazio
-const initialOwnerState: Omit<Owner, 'role'> = {
+const initialOwnerState: Omit<Owner, 'id' | 'created_at' | 'updated_at'> = {
+  role: 'OWNER',
   full_name: '',
-  cpf: '',
+  marital_status_id: 0,
+  profession: '',
   rg: '',
   issuing_body: '',
-  profession: '',
-  celphone: '',
+  cpf: '',
+  cellphone: '',
   email: '',
-  marital_status_id: undefined,
   cep: '',
   street: '',
   number: '',
   complement: '',
   neighborhood: '',
-  city_id: undefined,
-  note: ''
+  city_id: 0,
+  note: '',
+  uf_rg: '',
+  gender: '',
+  nationality: '',
+  branch: '',
+  account: '',
+  bank: '',
+  account_type: '',
 };
 
 // Tipo para arquivos armazenados
@@ -170,6 +182,8 @@ const OwnerForm = () => {
       setSelectedStateId(value ? Number(value) : undefined);
     } else if (name === 'city_id' || name === 'marital_status_id') {
       setOwner(prev => ({ ...prev, [name]: value ? Number(value) : undefined }));
+    } else if (name === 'uf_rg') {
+      setOwner(prev => ({ ...prev, [name]: value }));
     } else {
       setOwner(prev => ({ ...prev, [name]: value }));
     }
@@ -400,13 +414,40 @@ const OwnerForm = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    // Verificar campos obrigatórios
+    const missingFields = [];
+    if (!owner.cep) missingFields.push('CEP');
+    if (!owner.street) missingFields.push('Logradouro');
+    if (!owner.number) missingFields.push('Número');
+    if (!owner.neighborhood) missingFields.push('Bairro');
+    if (!owner.city_id) missingFields.push('Cidade');
+    if (!owner.cellphone) missingFields.push('Telefone/Celular');
+    if (!owner.email) missingFields.push('E-mail');
+    if (!owner.rg) missingFields.push('RG');
+    if (!owner.issuing_body) missingFields.push('Órgão Emissor');
+    if (!owner.uf_rg) missingFields.push('UF do RG');
+
+    if (missingFields.length > 0) {
+      toast.error(`Os seguintes campos são obrigatórios: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    // Verificar se o UF do RG tem mais de 2 caracteres
+    if (owner.uf_rg.length > 2) {
+      toast.error('O campo UF do RG não pode conter mais de 2 caracteres.');
+      return;
+    }
+
+    // Certificar-se de que o UF do RG está em maiúsculas
+    const ownerData = { ...owner, uf_rg: owner.uf_rg.toUpperCase() };
+
     // Validação básica
-    if (!owner.full_name || !owner.full_name.trim()) {
+    if (!ownerData.full_name || !ownerData.full_name.trim()) {
       setError('Nome completo é obrigatório');
       return;
     }
 
-    if (!owner.cpf || owner.cpf.length !== 11) {
+    if (!ownerData.cpf || ownerData.cpf.length !== 11) {
       setError('CPF inválido. Deve conter 11 dígitos');
       return;
     }
@@ -418,12 +459,12 @@ const OwnerForm = () => {
       let ownerId = id;
 
       // Remover propriedades não primitivas ou calculadas
-      const { cities, states, ...ownerData } = owner as any;
+      const { cities, states, ...ownerDataToSend } = ownerData as any;
 
       if (isEditMode && id) {
-        await ownerService.update(id, ownerData);
+        await ownerService.update(id, ownerDataToSend);
       } else {
-        const newOwner = await ownerService.create(ownerData);
+        const newOwner = await ownerService.create(ownerDataToSend);
         setOwner(newOwner);
         ownerId = newOwner.id;
       }
@@ -555,7 +596,7 @@ const OwnerForm = () => {
           {/* RG */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="rg">
-              RG
+              RG *
             </label>
             <InputMask
               mask="99.999.999-9"
@@ -565,7 +606,7 @@ const OwnerForm = () => {
               value={owner.rg || ''}
               onChange={(e) => {
                 // Salvar com a máscara removida
-                const value = e.target.value.replace(/[^\d]/g, '');
+                const value = e.target.value.replace(/[^ -]+/g, '');
                 setOwner(prev => ({ ...prev, rg: value }));
               }}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -575,7 +616,7 @@ const OwnerForm = () => {
           {/* Órgão Emissor */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="issuing_body">
-              Órgão Emissor
+              Órgão Emissor *
             </label>
             <input
               type="text"
@@ -587,6 +628,118 @@ const OwnerForm = () => {
             />
           </div>
 
+          {/* UF do RG */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="uf_rg">
+              UF do RG *
+            </label>
+            <input
+              type="text"
+              id="uf_rg"
+              name="uf_rg"
+              value={owner.uf_rg || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Gênero */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="gender">
+              Gênero
+            </label>
+            <select
+              id="gender"
+              name="gender"
+              value={owner.gender || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            >
+              <option value="">Selecione...</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Feminino">Feminino</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          {/* Nacionalidade */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nationality">
+              Nacionalidade
+            </label>
+            <input
+              type="text"
+              id="nationality"
+              name="nationality"
+              value={owner.nationality || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Agência Bancária */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="branch">
+              Agência Bancária
+            </label>
+            <input
+              type="text"
+              id="branch"
+              name="branch"
+              value={owner.branch || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Número da Conta */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="account">
+              Número da Conta
+            </label>
+            <input
+              type="text"
+              id="account"
+              name="account"
+              value={owner.account || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Nome do Banco */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="bank">
+              Nome do Banco
+            </label>
+            <input
+              type="text"
+              id="bank"
+              name="bank"
+              value={owner.bank || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          {/* Tipo de Conta */}
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="account_type">
+              Tipo de Conta
+            </label>
+            <select
+              id="account_type"
+              name="account_type"
+              value={owner.account_type || ''}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            >
+              <option value="">Selecione...</option>
+              <option value="Corrente">Corrente</option>
+              <option value="Poupança">Poupança</option>
+            </select>
+          </div>
+
           {/* Contatos */}
           <div className="col-span-1 md:col-span-2">
             <h2 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
@@ -596,19 +749,19 @@ const OwnerForm = () => {
 
           {/* Celular */}
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="celphone">
-              Telefone/Celular
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="cellphone">
+              Telefone/Celular *
             </label>
             <InputMask
               mask="(99) 99999-9999"
               type="text"
-              id="celphone"
-              name="celphone"
-              value={owner.celphone || ''}
+              id="cellphone"
+              name="cellphone"
+              value={owner.cellphone || ''}
               onChange={(e) => {
                 // Remover caracteres não numéricos
                 const numericValue = e.target.value.replace(/\D/g, '');
-                setOwner(prev => ({ ...prev, celphone: numericValue }));
+                setOwner(prev => ({ ...prev, cellphone: numericValue }));
               }}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
@@ -617,7 +770,7 @@ const OwnerForm = () => {
           {/* Email */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-              E-mail
+              E-mail *
             </label>
             <input
               type="email"
@@ -639,7 +792,7 @@ const OwnerForm = () => {
           {/* CEP */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="cep">
-              CEP
+              CEP *
             </label>
             <div className="flex">
               <InputMask
@@ -702,7 +855,7 @@ const OwnerForm = () => {
           {/* Cidade */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="city_id">
-              Cidade
+              Cidade *
             </label>
             <select
               id="city_id"
@@ -724,7 +877,7 @@ const OwnerForm = () => {
           {/* Bairro */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="neighborhood">
-              Bairro
+              Bairro *
             </label>
             <input
               type="text"
@@ -736,11 +889,10 @@ const OwnerForm = () => {
             />
           </div>
 
-
           {/* Logradouro */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="street">
-              Logradouro
+              Logradouro *
             </label>
             <input
               type="text"
@@ -755,7 +907,7 @@ const OwnerForm = () => {
           {/* Número */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="number">
-              Número
+              Número *
             </label>
             <input
               type="text"
@@ -781,7 +933,6 @@ const OwnerForm = () => {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             />
           </div>
-
 
           {/* Observações */}
           <div className="col-span-1 md:col-span-2">
@@ -895,6 +1046,8 @@ const OwnerForm = () => {
           </div>
         </div>
 
+
+
         {/* Botões de ação */}
         <div className="flex justify-end mt-6">
           <button
@@ -923,6 +1076,8 @@ const OwnerForm = () => {
           </button>
         </div>
       </form>
+
+      <ToastContainer aria-label="Notificações" />
     </div>
   );
 };

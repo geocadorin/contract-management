@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Contract, ContractKind } from '../../interfaces/Contract';
+import { Contract } from '../../interfaces/Contract';
+import { ContractKind } from '../../interfaces/Enums';
 import { contractService } from '../../services/contractService';
 import { FiEdit, FiTrash2, FiPlus, FiEye, FiSearch, FiChevronLeft, FiChevronRight, FiFileText, FiDownload } from 'react-icons/fi';
 import { exportToExcel, formatContractsForExport } from '../../Utilities/excelExporter';
@@ -413,7 +414,7 @@ const ContractList = () => {
                       {contract.owners?.rg ? formatRg(contract.owners.rg) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {contract.owners?.celphone ? formatPhone(contract.owners.celphone) : '-'}
+                      {contract.owners?.cellphone ? formatPhone(contract.owners.cellphone) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">

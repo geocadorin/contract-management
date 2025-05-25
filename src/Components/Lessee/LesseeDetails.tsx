@@ -7,45 +7,46 @@ import { FiEdit, FiArrowLeft, FiUser, FiHome, FiPhone, FiMail, FiFile } from 're
 import { SiAdobeacrobatreader } from 'react-icons/si';
 import { BsFiletypeDocx } from 'react-icons/bs';
 import PartnerList from '../Common/PartnerList';
+import ReferenceList from '../Common/ReferenceList';
 import { generateLesseePdf, generateLesseeDocx } from '../../Utilities/documentGenerator';
 
 const LesseeDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [lessee, setLessee] = useState<Lessee | null>(null);
   const [maritalStatus, setMaritalStatus] = useState<MaritalStatus | null>(null);
   const [city, setCity] = useState<City | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [exportLoading, setExportLoading] = useState<{pdf: boolean, docx: boolean}>({pdf: false, docx: false});
-  
+  const [exportLoading, setExportLoading] = useState<{ pdf: boolean, docx: boolean }>({ pdf: false, docx: false });
+
   useEffect(() => {
     const fetchLesseeDetails = async () => {
       if (!id) return;
-      
+
       try {
         setLoading(true);
-        
+
         // Buscar inquilino
         const lesseeData = await lesseeService.getById(id);
         if (!lesseeData) {
           throw new Error('Inquilino não encontrado');
         }
         setLessee(lesseeData);
-        
+
         // Buscar estado civil se disponível
         if (lesseeData.marital_status_id) {
           const maritalStatusData = await locationService.getMaritalStatusById(lesseeData.marital_status_id);
           setMaritalStatus(maritalStatusData);
         }
-        
+
         // Buscar cidade se disponível
         if (lesseeData.city_id) {
           const cityData = await locationService.getCityById(lesseeData.city_id);
           setCity(cityData);
         }
-        
+
       } catch (err) {
         console.error('Erro ao carregar detalhes do inquilino:', err);
         setError('Erro ao carregar detalhes. Por favor, tente novamente.');
@@ -53,10 +54,10 @@ const LesseeDetails = () => {
         setLoading(false);
       }
     };
-    
+
     fetchLesseeDetails();
   }, [id]);
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -64,7 +65,7 @@ const LesseeDetails = () => {
       </div>
     );
   }
-  
+
   if (error || !lessee) {
     return (
       <div className="p-4">
@@ -80,11 +81,11 @@ const LesseeDetails = () => {
       </div>
     );
   }
-  
+
   const formatCpf = (cpf: string) => {
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
-  
+
   // Formatar telefone
   const formatPhone = (phone?: string) => {
     if (!phone) return 'Não informado';
@@ -95,7 +96,7 @@ const LesseeDetails = () => {
     }
     return phone;
   };
-  
+
   // Formatar RG
   const formatRg = (rg?: string) => {
     if (!rg) return 'Não informado';
@@ -104,39 +105,39 @@ const LesseeDetails = () => {
     }
     return rg;
   };
-  
+
   // Formatar CEP
   const formatCep = (cep?: string) => {
     if (!cep) return 'Não informado';
     return cep.replace(/(\d{5})(\d{3})/, '$1-$2');
   };
-  
+
   const handleExportPdf = () => {
     if (!lessee) return;
-    setExportLoading(prev => ({...prev, pdf: true}));
+    setExportLoading(prev => ({ ...prev, pdf: true }));
     try {
       generateLesseePdf(lessee);
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
       alert('Erro ao gerar o PDF. Por favor, tente novamente.');
     } finally {
-      setExportLoading(prev => ({...prev, pdf: false}));
+      setExportLoading(prev => ({ ...prev, pdf: false }));
     }
   };
 
   const handleExportDocx = () => {
     if (!lessee) return;
-    setExportLoading(prev => ({...prev, docx: true}));
+    setExportLoading(prev => ({ ...prev, docx: true }));
     try {
       generateLesseeDocx(lessee);
     } catch (error) {
       console.error('Erro ao gerar DOCX:', error);
       alert('Erro ao gerar o documento DOCX. Por favor, tente novamente.');
     } finally {
-      setExportLoading(prev => ({...prev, docx: false}));
+      setExportLoading(prev => ({ ...prev, docx: false }));
     }
   };
-  
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
@@ -166,125 +167,168 @@ const LesseeDetails = () => {
             )}
             Exportar DOCX
           </button>
-          <Link 
-            to={`/lessees/${id}/edit`} 
+          <Link
+            to={`/lessees/${id}/edit`}
             className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md flex items-center"
           >
             <FiEdit className="mr-2" /> Editar
           </Link>
         </div>
       </div>
-      
+
       <div className="bg-white shadow-md rounded-lg p-6">
         {/* Informações pessoais */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2 flex items-center">
             <FiUser className="mr-2" /> Informações Pessoais
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-semibold text-gray-600">Nome Completo</p>
               <p className="text-gray-800">{lessee.full_name}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">CPF</p>
               <p className="text-gray-800">{formatCpf(lessee.cpf)}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">Estado Civil</p>
               <p className="text-gray-800">{maritalStatus?.name || 'Não informado'}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">Profissão</p>
               <p className="text-gray-800">{lessee.profession || 'Não informado'}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">RG</p>
               <p className="text-gray-800">{formatRg(lessee.rg)}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">Órgão Emissor</p>
               <p className="text-gray-800">{lessee.issuing_body || 'Não informado'}</p>
             </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-600">UF do RG</p>
+              <p className="text-gray-800">{lessee.uf_rg || 'Não informado'}</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-600">Gênero</p>
+              <p className="text-gray-800">{lessee.gender || 'Não informado'}</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-600">Nacionalidade</p>
+              <p className="text-gray-800">{lessee.nationality || 'Não informado'}</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-600">Agência Bancária</p>
+              <p className="text-gray-800">{lessee.branch || 'Não informado'}</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-600">Número da Conta</p>
+              <p className="text-gray-800">{lessee.account || 'Não informado'}</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-600">Nome do Banco</p>
+              <p className="text-gray-800">{lessee.bank || 'Não informado'}</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-600">Tipo de Conta</p>
+              <p className="text-gray-800">{lessee.account_type || 'Não informado'}</p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-600">Optou por Procuração</p>
+              <p className="text-gray-800">{lessee.opted_for_power_of_attorney ? 'Sim' : 'Não'}</p>
+            </div>
           </div>
         </div>
-        
+
         {/* Contato */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2 flex items-center">
             <FiPhone className="mr-2" /> Contato
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-semibold text-gray-600">Telefone/Celular</p>
-              <p className="text-gray-800">{formatPhone(lessee.celphone)}</p>
+              <p className="text-gray-800">{formatPhone(lessee.cellphone)}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">E-mail</p>
               <p className="text-gray-800">{lessee.email || 'Não informado'}</p>
             </div>
           </div>
         </div>
-        
+
         {/* Endereço */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2 flex items-center">
             <FiHome className="mr-2" /> Endereço
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm font-semibold text-gray-600">CEP</p>
               <p className="text-gray-800">{formatCep(lessee.cep)}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">Estado/Cidade</p>
               <p className="text-gray-800">
                 {city ? `${city.states?.name || ''} - ${city.name}` : 'Não informado'}
               </p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">Logradouro</p>
               <p className="text-gray-800">{lessee.street || 'Não informado'}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">Número</p>
               <p className="text-gray-800">{lessee.number || 'Não informado'}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">Complemento</p>
               <p className="text-gray-800">{lessee.complement || 'Não informado'}</p>
             </div>
-            
+
             <div>
               <p className="text-sm font-semibold text-gray-600">Bairro</p>
               <p className="text-gray-800">{lessee.neighborhood || 'Não informado'}</p>
             </div>
           </div>
         </div>
-        
+
         {/* Parceiros/Cônjuges */}
         {id && <PartnerList personId={id} />}
-        
+
+        {/* Referências Pessoais */}
+        {id && <ReferenceList personId={id} />}
+
         {/* Observações */}
         {lessee.note && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2 flex items-center">
               <FiFile className="mr-2" /> Observações
             </h2>
-            
+
             <div className="bg-gray-50 p-4 rounded-md">
               <p className="text-gray-800 whitespace-pre-line">{lessee.note}</p>
             </div>

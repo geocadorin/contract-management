@@ -14,11 +14,11 @@ const PartnerList = ({ personId }: PartnerListProps) => {
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
   const [editingPartner, setEditingPartner] = useState<PersonPartner | null>(null);
-  
+
   // Carregar parceiros
   const fetchPartners = async () => {
     if (!personId) return;
-    
+
     try {
       setLoading(true);
       const data = await personService.getPartners(personId);
@@ -30,17 +30,17 @@ const PartnerList = ({ personId }: PartnerListProps) => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchPartners();
   }, [personId]);
-  
+
   // Excluir parceiro
   const handleDelete = async (id: string) => {
     if (!window.confirm('Tem certeza que deseja excluir este parceiro?')) {
       return;
     }
-    
+
     try {
       await personService.deletePartner(id);
       setPartners(partners.filter(partner => partner.id !== id));
@@ -49,19 +49,19 @@ const PartnerList = ({ personId }: PartnerListProps) => {
       setError('Erro ao excluir parceiro. Por favor, tente novamente.');
     }
   };
-  
+
   // Formatar CPF
   const formatCpf = (cpf?: string) => {
     if (!cpf) return '-';
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   };
-  
+
   // Formatar RG
   const formatRg = (rg?: string) => {
     if (!rg) return '-';
     return rg.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
   };
-  
+
   // Formatar telefone
   const formatPhone = (phone?: string) => {
     if (!phone) return '-';
@@ -72,14 +72,14 @@ const PartnerList = ({ personId }: PartnerListProps) => {
     }
     return phone;
   };
-  
+
   // Salvar parceiro (novo ou editado)
   const handleSavePartner = () => {
     fetchPartners();
     setShowAddForm(false);
     setEditingPartner(null);
   };
-  
+
   if (loading && partners.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -94,14 +94,14 @@ const PartnerList = ({ personId }: PartnerListProps) => {
       </div>
     );
   }
-  
+
   return (
     <div className="bg-white rounded-lg shadow p-6 mb-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-800 flex items-center">
           <FiUsers className="mr-2" /> Parceiros/Cônjuges
         </h3>
-        
+
         {!showAddForm && !editingPartner && (
           <button
             onClick={() => setShowAddForm(true)}
@@ -111,14 +111,14 @@ const PartnerList = ({ personId }: PartnerListProps) => {
           </button>
         )}
       </div>
-      
+
       {/* Mensagem de erro */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
-      
+
       {/* Formulário para adicionar ou editar parceiro */}
       {showAddForm && (
         <PartnerForm
@@ -127,7 +127,7 @@ const PartnerList = ({ personId }: PartnerListProps) => {
           onCancel={() => setShowAddForm(false)}
         />
       )}
-      
+
       {editingPartner && (
         <PartnerForm
           personId={personId}
@@ -136,7 +136,7 @@ const PartnerList = ({ personId }: PartnerListProps) => {
           onCancel={() => setEditingPartner(null)}
         />
       )}
-      
+
       {/* Lista de parceiros */}
       {partners.length > 0 ? (
         <div className="overflow-x-auto">
@@ -175,8 +175,8 @@ const PartnerList = ({ personId }: PartnerListProps) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {partner.rg ? formatRg(partner.rg) : '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatPhone(partner.celphone)}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatPhone(partner.cellphone)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {partner.email || '-'}

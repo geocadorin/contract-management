@@ -101,17 +101,31 @@ EXECUTE FUNCTION trigger_set_timestamp();
 -- Table person_reference
 CREATE TABLE person_reference (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR,
-    telefone VARCHAR,
-    endereco_completo VARCHAR,
-    cep VARCHAR,
-    person_id UUID,
-    kinship VARCHAR,
+    person_id UUID NOT NULL,
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    telefone VARCHAR(15),
+    endereco_completo TEXT,
+    cep VARCHAR(8),
+    kinship VARCHAR(100),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
 
     CONSTRAINT fk_person_reference_person
         FOREIGN KEY (person_id)
         REFERENCES persons(id)
+        ON DELETE CASCADE
 );
+
+-- Índices para a tabela person_reference
+CREATE INDEX idx_person_reference_person_id ON person_reference(person_id);
+CREATE INDEX idx_person_reference_full_name ON person_reference(full_name);
+
+-- Trigger para 'updated_at' na tabela person_reference
+CREATE TRIGGER set_timestamp_person_reference
+BEFORE UPDATE ON person_reference
+FOR EACH ROW
+EXECUTE FUNCTION trigger_set_timestamp();
 
 
 -- Tabela para Estados Civis (Exemplo)

@@ -1,6 +1,8 @@
 import { useState, useEffect, FormEvent, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Contract, ContractStatus, ContractKind } from '../../interfaces/Contract';
+import { Contract } from '../../interfaces/Contract';
+import { ContractStatus, ContractKind } from '../../interfaces/Enums';
+import { ContractOrigin } from '../../interfaces/Enums';
 import { RealEstate } from '../../interfaces/RealEstate';
 import { Owner, Lessee } from '../../interfaces/Person';
 import { contractService } from '../../services/contractService';
@@ -22,7 +24,10 @@ const initialContractState: Omit<Contract, 'id' | 'created_at' | 'updated_at'> =
   status: 'Ativo',
   owner_id: '',
   lessee_id: '',
-  real_estate_id: ''
+  real_estate_id: '',
+  extra_fees_details: 0,
+  contract_signing_date: '',
+  contract_origin: 'Exclusivo'
 };
 
 // Tipo para arquivos armazenados
@@ -57,6 +62,9 @@ const ContractForm = () => {
   // Tipos de contrato conforme o enum do SQL
   const contractKinds: ContractKind[] = ['Venda com exclusividade', 'Venda sem exclusividade', 'Locação com administração', 'Locação'];
 
+  // Origens de contrato conforme o enum do SQL
+  const contractOrigins: ContractOrigin[] = ['Exclusivo', 'Compartilhado: Divisão por 2', 'Compartilhado: Divisão por 3'];
+
   // Estado para controlar quando o usuário está arrastando um arquivo
   const [isDragging, setIsDragging] = useState(false);
 
@@ -81,6 +89,9 @@ const ContractForm = () => {
 
           contractWithoutId.end_date = contractWithoutId.end_date ?
             new Date(contractWithoutId.end_date).toISOString().split('T')[0] : '';
+
+          contractWithoutId.contract_signing_date = contractWithoutId.contract_signing_date ?
+            new Date(contractWithoutId.contract_signing_date).toISOString().split('T')[0] : '';
 
           setContract(contractWithoutId);
 
@@ -134,7 +145,7 @@ const ContractForm = () => {
     const { name, value, type } = e.target as HTMLInputElement;
 
     // Tratar campos numéricos e booleanos
-    if (name === 'payment_value' || name === 'day_payment' || name === 'duration') {
+    if (name === 'payment_value' || name === 'day_payment' || name === 'duration' || name === 'extra_fees_details') {
       setContract(prev => ({ ...prev, [name]: value ? Number(value) : 0 }));
     } else if (type === 'checkbox') {
       const checkbox = e.target as HTMLInputElement;
@@ -627,6 +638,52 @@ const ContractForm = () => {
                 placeholder="Duração em meses"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Taxas Extras (R$)
+              </label>
+              <input
+                type="number"
+                name="extra_fees_details"
+                value={contract.extra_fees_details || ''}
+                onChange={handleChange}
+                step="0.01"
+                min="0"
+                placeholder="0,00"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Data de Assinatura
+              </label>
+              <input
+                type="date"
+                name="contract_signing_date"
+                value={contract.contract_signing_date || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Origem do Contrato
+              </label>
+              <select
+                name="contract_origin"
+                value={contract.contract_origin || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+              >
+                <option value="">Selecione a origem</option>
+                {contractOrigins.map(origin => (
+                  <option key={origin} value={origin}>{origin}</option>
+                ))}
+              </select>
             </div>
           </div>
 

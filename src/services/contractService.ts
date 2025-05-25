@@ -24,26 +24,26 @@ export const contractService = {
             )
           `)
           .order('created_at', { ascending: false });
-        
+
         if (error) {
           throw error;
         }
-        
+
         return data || [];
       } catch (joinError) {
         console.error('Erro ao buscar contratos com joins:', joinError);
-        
+
         // Se falhar, tentar consulta simples sem relacionamentos
         const { data, error } = await supabase
           .from('contracts')
           .select('*')
           .order('created_at', { ascending: false });
-        
+
         if (error) {
           console.error('Erro mesmo na consulta simples:', error);
           throw error;
         }
-        
+
         return data || [];
       }
     } catch (err) {
@@ -51,7 +51,7 @@ export const contractService = {
       throw err;
     }
   },
-  
+
   // Buscar contrato por ID
   async getById(id: string): Promise<Contract | null> {
     try {
@@ -61,8 +61,8 @@ export const contractService = {
           .from('contracts')
           .select(`
             *,
-            owners:persons!owner_id (id, full_name, cpf, email, celphone),
-            lessees:persons!lessee_id (id, full_name, cpf, email, celphone),
+            owners:persons!owner_id (id, full_name, cpf, email, cellphone),
+            lessees:persons!lessee_id (id, full_name, cpf, email, cellphone),
             real_estates (
               id, 
               street, 
@@ -75,27 +75,27 @@ export const contractService = {
           `)
           .eq('id', id)
           .single();
-        
+
         if (error) {
           throw error;
         }
-        
+
         return data;
       } catch (joinError) {
         console.error('Erro ao buscar contrato com joins:', joinError);
-        
+
         // Se falhar, tentar consulta simples sem relacionamentos
         const { data, error } = await supabase
           .from('contracts')
           .select('*')
           .eq('id', id)
           .single();
-        
+
         if (error) {
           console.error('Erro mesmo na consulta simples:', error);
           throw error;
         }
-        
+
         return data;
       }
     } catch (err) {
@@ -103,7 +103,7 @@ export const contractService = {
       throw err;
     }
   },
-  
+
   // Criar novo contrato
   async create(contract: Contract): Promise<Contract> {
     try {
@@ -112,19 +112,19 @@ export const contractService = {
         .insert([contract])
         .select()
         .single();
-      
+
       if (error) {
         console.error('Erro detalhado ao criar contrato:', error);
         throw error;
       }
-      
+
       return data;
     } catch (err) {
       console.error('Exceção ao criar contrato:', err);
       throw err;
     }
   },
-  
+
   // Atualizar contrato existente
   async update(id: string, contract: Partial<Contract>): Promise<Contract> {
     try {
@@ -134,19 +134,19 @@ export const contractService = {
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) {
         console.error('Erro detalhado ao atualizar contrato:', error);
         throw error;
       }
-      
+
       return data;
     } catch (err) {
       console.error('Exceção ao atualizar contrato:', err);
       throw err;
     }
   },
-  
+
   // Excluir contrato
   async delete(id: string): Promise<void> {
     try {
@@ -154,7 +154,7 @@ export const contractService = {
         .from('contracts')
         .delete()
         .eq('id', id);
-      
+
       if (error) {
         console.error('Erro detalhado ao excluir contrato:', error);
         throw error;

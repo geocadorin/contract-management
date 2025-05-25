@@ -256,8 +256,8 @@ const LesseeList = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {lessee.rg ? formatRg(lessee.rg) : '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {lessee.celphone ? formatPhone(lessee.celphone) : '-'}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {lessee.cellphone ? formatPhone(lessee.cellphone) : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {lessee.email || '-'}

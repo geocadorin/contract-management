@@ -1,19 +1,5 @@
 import { City, State, Owner, Lessee } from './Person';
-
-// Tipo para as categorias de imóveis
-export type RealEstateKind = 
-  'Casa' |
-  'Apartamento' |
-  'Salas comerciais' |
-  'Loja' |
-  'Galpão';
-
-// Tipo para os status de imóveis
-export type StatusRealEstate = 
-  'Disponível' |
-  'Alugado' |
-  'Vendido' |
-  'Cancelado';
+import { PropertyCategory, RealEstateKind, StatusRealEstate } from './Enums';
 
 // Interface para imóveis
 export interface RealEstate {
@@ -31,15 +17,19 @@ export interface RealEstate {
   has_inspection: boolean;
   status_real_estate: StatusRealEstate;
   has_proof_document: boolean;
+  energy_concessionaire?: string;
+  water_concessionaire?: string;
+  property_category?: PropertyCategory;
+  inspection_report_date?: string;
   owner_id: string;
   lessee_id?: string;
-  
+
   // Relações (opcionais para quando vierem do banco)
   cities?: City;
   states?: State;
   owners?: Owner;
   lessees?: Lessee;
-  
+
   created_at?: string;
   updated_at?: string;
 } 
