@@ -419,6 +419,32 @@ const ContractForm = () => {
         contractId = newContract.id;
       }
 
+      // Atualizar o inquilino do imóvel se um inquilino foi especificado no contrato
+      if (dataToSend.real_estate_id && dataToSend.lessee_id) {
+        try {
+          await realEstateService.update(dataToSend.real_estate_id, {
+            lessee_id: dataToSend.lessee_id,
+            status_real_estate: 'Alugado'
+          });
+          console.log('Imóvel atualizado com o inquilino do contrato');
+        } catch (updateError) {
+          console.error('Erro ao atualizar inquilino do imóvel:', updateError);
+          // Não interromper o fluxo, apenas logar o erro
+        }
+      } else if (dataToSend.real_estate_id && !dataToSend.lessee_id) {
+        // Se não há inquilino no contrato, remover inquilino do imóvel e definir como disponível
+        try {
+          await realEstateService.update(dataToSend.real_estate_id, {
+            lessee_id: null,
+            status_real_estate: 'Disponível'
+          });
+          console.log('Imóvel atualizado - inquilino removido');
+        } catch (updateError) {
+          console.error('Erro ao remover inquilino do imóvel:', updateError);
+          // Não interromper o fluxo, apenas logar o erro
+        }
+      }
+
       // Só fazer upload se tiver arquivos novos selecionados
       if (files.length > 0 && contractId) {
         await uploadFiles(contractId);
