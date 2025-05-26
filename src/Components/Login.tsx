@@ -62,20 +62,21 @@ const Login = ({ onLogin }: LoginProps) => {
         confettiContainer.className = 'fixed top-0 left-0 w-full h-full pointer-events-none z-50';
         document.body.appendChild(confettiContainer);
 
-        const colors = ['#f39200', '#742851', '#0067B1']; // Amarelo, Rosa, Azul
+        const colors = ['#f39200', '#742851', '#0067B1', '#ff2288', '#387ef0', '#ffd700', '#ff6b6b', '#4ecdc4']; // Mais cores
 
-        for (let i = 0; i < 500; i++) {
+        for (let i = 0; i < 800; i++) {
             const confetti = document.createElement('div');
             confetti.className = 'confetti';
             confetti.style.left = Math.random() * 100 + 'vw';
             confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confetti.style.animationDelay = Math.random() * 3 + 's';
+            confetti.style.animationDuration = (Math.random() * 2 + 3) + 's'; // Variação na duração
             confettiContainer.appendChild(confetti);
         }
 
         setTimeout(() => {
             document.body.removeChild(confettiContainer);
-        }, 5000);
+        }, 7000);
 
         // Show celebration message
         const celebration = document.createElement('div');
@@ -128,20 +129,98 @@ const Login = ({ onLogin }: LoginProps) => {
                 {`
                 .confetti {
                     position: absolute;
-                    width: 10px;
-                    height: 10px;
+                    width: 12px;
+                    height: 12px;
                     background-color: #f39200;
-                    opacity: 0.7;
-                    animation: fall 3s linear infinite;
+                    opacity: 0.8;
+                    animation: fall 4s linear infinite;
                     border-radius: 50%;
+                }
+
+                .confetti:nth-child(odd) {
+                    border-radius: 0;
+                    transform: rotate(45deg);
+                }
+
+                .confetti:nth-child(3n) {
+                    width: 8px;
+                    height: 16px;
+                    border-radius: 4px;
+                }
+
+                .confetti:nth-child(4n) {
+                    width: 16px;
+                    height: 8px;
+                    border-radius: 4px;
                 }
 
                 @keyframes fall {
                     0% {
-                        transform: translateY(-100vh) rotate(0deg);
+                        transform: translateY(-100vh) rotate(0deg) scale(1);
+                        opacity: 1;
+                    }
+                    50% {
+                        opacity: 0.8;
                     }
                     100% {
-                        transform: translateY(100vh) rotate(720deg);
+                        transform: translateY(100vh) rotate(720deg) scale(0.5);
+                        opacity: 0;
+                    }
+                }
+
+                .katana-border {
+                    position: relative;
+                    display: inline-block;
+                    border-radius: 50%;
+                    padding: 12px;
+                }
+
+                .katana-border::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: conic-gradient(
+                        #ff2288 0deg,
+                        #387ef0 90deg,
+                        #ff2288 180deg,
+                        #387ef0 270deg,
+                        #ff2288 360deg
+                    );
+                    border-radius: 50%;
+                    animation: katana-rotate 3s linear infinite;
+                    z-index: -1;
+                }
+
+                .katana-border::after {
+                    content: '';
+                    position: absolute;
+                    top: 8px;
+                    left: 8px;
+                    right: 8px;
+                    bottom: 8px;
+                    background: white;
+                    border-radius: 50%;
+                    z-index: 0;
+                }
+
+                .katana-image {
+                    position: relative;
+                    z-index: 1;
+                    background: white;
+                    padding: 16px;
+                    border-radius: 50%;
+                    object-fit: contain;
+                }
+
+                @keyframes katana-rotate {
+                    0% {
+                        transform: rotate(0deg);
+                    }
+                    100% {
+                        transform: rotate(360deg);
                     }
                 }
                 `}
@@ -157,14 +236,24 @@ const Login = ({ onLogin }: LoginProps) => {
                 <div className="flex flex-col items-center justify-center">
                     <div
                         onClick={handleLogoClick}
-                        className={`cursor-pointer transition-all duration-500 transform hover:scale-105 ${showKatana ? '' : ''} ${logoClickCount >= 3 ? 'animate-bounce' : ''}`}
+                        className={`cursor-pointer transition-all duration-500 transform hover:scale-105 ${logoClickCount >= 3 ? 'animate-bounce' : ''}`}
                         title={logoClickCount >= 3 ? `Cliques: ${logoClickCount}/7` : 'Sogrinha Logo'}
                     >
-                        <img
-                            src={showKatana ? katanaImg : logoImg}
-                            alt={showKatana ? "Katana Desenho" : "Sogrinha Logo"}
-                            className={`w-32 h-auto mb-6 transition-all duration-500 ${showKatana ? 'scale-110' : ''}`}
-                        />
+                        {showKatana ? (
+                            <div className="katana-border">
+                                <img
+                                    src={katanaImg}
+                                    alt="Katana Desenho"
+                                    className="katana-image w-36 h-36 transition-all duration-500 scale-110"
+                                />
+                            </div>
+                        ) : (
+                            <img
+                                src={logoImg}
+                                alt="Sogrinha Logo"
+                                className="w-32 h-auto mb-6 transition-all duration-500"
+                            />
+                        )}
                     </div>
                     <h1 className={`text-3xl font-bold transition-all duration-500 ${showKatana ? 'text-pink-600 animate-pulse' : 'text-indigo-800'
                         }`}>
