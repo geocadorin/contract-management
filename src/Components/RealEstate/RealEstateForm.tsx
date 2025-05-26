@@ -182,6 +182,14 @@ const RealEstateForm = () => {
     } else if (type === 'checkbox') {
       const checkbox = e.target as HTMLInputElement;
       setRealEstate(prev => ({ ...prev, [name]: checkbox.checked }));
+    } else if (name === 'lessee_id') {
+      // Se um inquilino for atribuído, forçar o status para 'Alugado'
+      // Se nenhum inquilino for selecionado, definir status como 'Disponível' e lessee_id como null
+      setRealEstate(prev => ({
+        ...prev,
+        [name]: value || null,
+        status_real_estate: value ? 'Alugado' : 'Disponível'
+      }));
     } else if (name === 'inspection_report_date') {
       setRealEstate(prev => ({ ...prev, [name]: value }));
     } else {
