@@ -51,6 +51,7 @@ const ContractForm = () => {
   const [owners, setOwners] = useState<Owner[]>([]);
   const [lessees, setLessees] = useState<Lessee[]>([]);
   const [realEstates, setRealEstates] = useState<RealEstate[]>([]);
+  const [filteredRealEstates, setFilteredRealEstates] = useState<RealEstate[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [storedFiles, setStoredFiles] = useState<StoredFile[]>([]);
 
@@ -109,6 +110,13 @@ const ContractForm = () => {
     }
   }, [id, isEditMode]);
 
+  // Filtrar imóveis quando o contrato for carregado (modo de edição)
+  useEffect(() => {
+    if (contract.owner_id && realEstates.length > 0) {
+      filterRealEstatesByOwner(contract.owner_id);
+    }
+  }, [contract.owner_id, realEstates]);
+
   // Carregar proprietários, inquilinos e imóveis
   useEffect(() => {
     const loadDadosIniciais = async () => {
@@ -153,6 +161,25 @@ const ContractForm = () => {
     } else {
       setContract(prev => ({ ...prev, [name]: value }));
     }
+
+    // Se o proprietário foi alterado, filtrar os imóveis
+    if (name === 'owner_id') {
+      filterRealEstatesByOwner(value);
+      // Limpar o imóvel selecionado se não pertencer ao novo proprietário
+      setContract(prev => ({ ...prev, real_estate_id: '' }));
+    }
+  };
+
+  // Filtrar imóveis por proprietário
+  const filterRealEstatesByOwner = (ownerId: string) => {
+    if (!ownerId) {
+      setFilteredRealEstates([]);
+      return;
+    }
+
+    const filtered = realEstates.filter(realEstate => realEstate.owner_id === ownerId);
+    console.log(`Imóveis filtrados para proprietário ${ownerId}:`, filtered);
+    setFilteredRealEstates(filtered);
   };
 
   // Gerar identificador único para o contrato
@@ -515,9 +542,17 @@ const ContractForm = () => {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
                 required
+                disabled={!contract.owner_id}
               >
-                <option value="">Selecione um imóvel</option>
-                {realEstates.map(realEstate => (
+                <option value="">
+                  {!contract.owner_id
+                    ? "Selecione um proprietário primeiro"
+                    : filteredRealEstates.length === 0
+                      ? "Nenhum imóvel encontrado para este proprietário"
+                      : "Selecione um imóvel"
+                  }
+                </option>
+                {filteredRealEstates.map(realEstate => (
                   <option key={realEstate.id} value={realEstate.id}>
                     {formatRealEstateAddress(realEstate)} - {realEstate.real_estate_kind}
                   </option>
