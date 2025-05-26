@@ -741,18 +741,27 @@ const LesseeForm = () => {
           </div>
 
           {/* Optou por Procuração */}
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="opted_for_power_of_attorney">
-              Optou por Procuração
-            </label>
-            <input
-              type="checkbox"
-              id="opted_for_power_of_attorney"
-              name="opted_for_power_of_attorney"
-              checked={lessee.opted_for_power_of_attorney || false}
-              onChange={handleChange}
-              className="shadow appearance-none border rounded text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
+          <div className="mb-4 col-span-1 md:col-span-2">
+            <div className="checkbox-container">
+              <label className="flex items-center cursor-pointer w-full">
+                <input
+                  type="checkbox"
+                  id="opted_for_power_of_attorney"
+                  name="opted_for_power_of_attorney"
+                  checked={lessee.opted_for_power_of_attorney || false}
+                  onChange={handleChange}
+                  className="power-of-attorney-checkbox"
+                />
+                <div className="flex-1">
+                  <span className="text-gray-700 font-semibold text-sm block">
+                    Optou por Procuração
+                  </span>
+                  <p className="text-gray-500 text-xs mt-1">
+                    Marque esta opção se o inquilino optou por procuração para representação legal
+                  </p>
+                </div>
+              </label>
+            </div>
           </div>
 
           {/* Contatos */}
@@ -949,8 +958,6 @@ const LesseeForm = () => {
             />
           </div>
 
-
-
           {/* Observações */}
           <div className="col-span-1 md:col-span-2">
             <h2 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
@@ -1062,8 +1069,6 @@ const LesseeForm = () => {
             )}
           </div>
         </div>
-
-
 
         {/* Botões de ação */}
         <div className="flex justify-end mt-6">
