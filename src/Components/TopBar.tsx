@@ -16,8 +16,8 @@ const TopBar = () => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
-      // Forçar recarregamento da página para limpar completamente o estado
-      window.location.href = '/login';
+      // Usar navigate em vez de window.location.href
+      navigate('/login');
     } catch (err) {
       console.error('Erro ao fazer logout:', err);
       alert('Não foi possível fazer logout. Tente novamente.');

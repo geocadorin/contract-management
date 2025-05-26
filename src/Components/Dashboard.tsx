@@ -41,90 +41,90 @@ const Dashboard = () => {
   const [availableRealEstateCount, setAvailableRealEstateCount] = useState<number>(0);
   const [totalMonthlyRevenue, setTotalMonthlyRevenue] = useState<number>(0);
   const [totalContractsValue, setTotalContractsValue] = useState<number>(0);
-  const [realEstatesByKind, setRealEstatesByKind] = useState<{[key: string]: number}>({});
-  const [contractsByKind, setContractsByKind] = useState<{[key: string]: number}>({});
-  const [realEstatesByStatus, setRealEstatesByStatus] = useState<{[key: string]: number}>({});
+  const [realEstatesByCategory, setRealEstatesByCategory] = useState<{ [key: string]: number }>({});
+  const [contractsByKind, setContractsByKind] = useState<{ [key: string]: number }>({});
+  const [realEstatesByStatus, setRealEstatesByStatus] = useState<{ [key: string]: number }>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { session } = useAuth();
-  
+
   useEffect(() => {
     const fetchCounts = async () => {
       try {
         setLoading(true);
-        
+
         // Buscar proprietários e inquilinos
         const owners = await ownerService.getAll();
         const lessees = await lesseeService.getAll();
-        
+
         setOwnerCount(owners.length);
         setLesseeCount(lessees.length);
-        
+
         // Buscar imóveis
         try {
           const realEstates = await realEstateService.getAll();
           setRealEstateCount(realEstates.length);
-          
+
           // Contagem de imóveis disponíveis
           const availableRealEstates = realEstates.filter(re => re.status_real_estate === 'Disponível');
           setAvailableRealEstateCount(availableRealEstates.length);
-          
-          // Distribuição de imóveis por tipo
-          const kindStats: {[key: string]: number} = {};
+
+          // Distribuição de imóveis por categoria
+          const categoryStats: { [key: string]: number } = {};
           realEstates.forEach(re => {
-            const kind = re.real_estate_kind || 'Não especificado';
-            kindStats[kind] = (kindStats[kind] || 0) + 1;
+            const category = re.property_category || 'Não especificado';
+            categoryStats[category] = (categoryStats[category] || 0) + 1;
           });
-          setRealEstatesByKind(kindStats);
-          
+          setRealEstatesByCategory(categoryStats);
+
           // Distribuição de imóveis por status
-          const statusStats: {[key: string]: number} = {};
+          const statusStats: { [key: string]: number } = {};
           realEstates.forEach(re => {
             const status = re.status_real_estate || 'Não especificado';
             statusStats[status] = (statusStats[status] || 0) + 1;
           });
           setRealEstatesByStatus(statusStats);
-          
+
         } catch (realEstateErr) {
           console.error('Erro específico ao carregar imóveis:', realEstateErr);
           setError('Erro ao carregar imóveis. Verifique o console para mais detalhes.');
         }
-        
+
         // Buscar contratos
         try {
           const contracts = await contractService.getAll();
           setContractCount(contracts.length);
-          
+
           // Contagem de contratos ativos
           const activeContracts = contracts.filter(c => c.status === 'Ativo');
           setActiveContractCount(activeContracts.length);
-          
+
           // Faturamento mensal (considerando contratos ativos de locação)
-          const rentalContracts = activeContracts.filter(c => 
+          const rentalContracts = activeContracts.filter(c =>
             c.contract_kind === 'Locação' || c.contract_kind === 'Locação com administração'
           );
-          
+
           const monthlyRevenue = rentalContracts.reduce(
-            (sum, contract) => sum + (contract.payment_value || 0), 
+            (sum, contract) => sum + (contract.payment_value || 0),
             0
           );
           setTotalMonthlyRevenue(monthlyRevenue);
-          
+
           // Valor total de contratos
           const totalValue = contracts.reduce(
-            (sum, contract) => sum + (contract.payment_value || 0), 
+            (sum, contract) => sum + (contract.payment_value || 0),
             0
           );
           setTotalContractsValue(totalValue);
-          
+
           // Distribuição de contratos por tipo
-          const contractKindStats: {[key: string]: number} = {};
+          const contractKindStats: { [key: string]: number } = {};
           contracts.forEach(c => {
             const kind = c.contract_kind || 'Não especificado';
             contractKindStats[kind] = (contractKindStats[kind] || 0) + 1;
           });
           setContractsByKind(contractKindStats);
-          
+
         } catch (contractErr) {
           console.error('Erro específico ao carregar contratos:', contractErr);
           // Não definimos um erro aqui, apenas logamos
@@ -136,17 +136,17 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-    
+
     fetchCounts();
   }, []);
-  
+
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', { 
-      style: 'currency', 
-      currency: 'BRL' 
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
     }).format(value);
   };
-  
+
   // Cores para os gráficos
   const chartColors = [
     '#742851', // primary
@@ -160,19 +160,19 @@ const Dashboard = () => {
     '#9C27B0',
     '#2196F3'
   ];
-  
-  // Configuração do gráfico de tipos de imóveis
-  const realEstateKindChartData = {
-    labels: Object.keys(realEstatesByKind),
+
+  // Configuração do gráfico de categorias de imóveis
+  const realEstateCategoryChartData = {
+    labels: Object.keys(realEstatesByCategory),
     datasets: [
       {
-        data: Object.values(realEstatesByKind),
-        backgroundColor: chartColors.slice(0, Object.keys(realEstatesByKind).length),
+        data: Object.values(realEstatesByCategory),
+        backgroundColor: chartColors.slice(0, Object.keys(realEstatesByCategory).length),
         borderWidth: 1
       }
     ]
   };
-  
+
   // Configuração do gráfico de status de imóveis
   const realEstateStatusChartData = {
     labels: Object.keys(realEstatesByStatus),
@@ -184,7 +184,7 @@ const Dashboard = () => {
       }
     ]
   };
-  
+
   // Configuração do gráfico de tipos de contratos
   const contractKindChartData = {
     labels: Object.keys(contractsByKind),
@@ -196,7 +196,7 @@ const Dashboard = () => {
       }
     ]
   };
-  
+
   // Configuração para o gráfico de barras de receita (simulado para exemplo)
   const revenueChartData = {
     labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
@@ -217,7 +217,7 @@ const Dashboard = () => {
       }
     ]
   };
-  
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -225,17 +225,17 @@ const Dashboard = () => {
       </div>
     );
   }
-  
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-primary mb-6">Painel de Controle</h1>
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
-      
+
       {/* Indicadores Principais */}
       <h2 className="text-xl font-semibold text-primary mb-4">Indicadores Principais</h2>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -259,7 +259,7 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
-        
+
         {/* Card de imóveis disponíveis */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
@@ -280,7 +280,7 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
-        
+
         {/* Card de faturamento mensal */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
@@ -301,7 +301,7 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
-        
+
         {/* Card de valor total de contratos */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
@@ -323,7 +323,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Gráficos */}
       <h2 className="text-xl font-semibold text-primary mb-4">Análise do Negócio</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -333,10 +333,10 @@ const Dashboard = () => {
             <FiPieChart className="mr-2" /> Distribuição de Imóveis por Tipo
           </h3>
           <div className="h-64">
-            <Pie data={realEstateKindChartData} options={{ maintainAspectRatio: false }} />
+            <Pie data={realEstateCategoryChartData} options={{ maintainAspectRatio: false }} />
           </div>
         </div>
-        
+
         {/* Gráfico de Status de Imóveis */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-medium text-primary mb-4 flex items-center">
@@ -346,7 +346,7 @@ const Dashboard = () => {
             <Pie data={realEstateStatusChartData} options={{ maintainAspectRatio: false }} />
           </div>
         </div>
-        
+
         {/* Gráfico de Tipos de Contratos */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-medium text-primary mb-4 flex items-center">
@@ -356,14 +356,14 @@ const Dashboard = () => {
             <Pie data={contractKindChartData} options={{ maintainAspectRatio: false }} />
           </div>
         </div>
-        
+
         {/* Gráfico de Receita Mensal */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-medium text-primary mb-4 flex items-center">
             <FiCalendar className="mr-2" /> Evolução da Receita Mensal
           </h3>
           <div className="h-64">
-            <Bar data={revenueChartData} options={{ 
+            <Bar data={revenueChartData} options={{
               maintainAspectRatio: false,
               scales: {
                 y: {
@@ -374,7 +374,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Sumário Rápido */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
         {/* Card de proprietários */}
@@ -397,7 +397,7 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
-        
+
         {/* Card de inquilinos */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
@@ -418,7 +418,7 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
-        
+
         {/* Card de imóveis */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
@@ -439,7 +439,7 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
-        
+
         {/* Card de contratos */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
@@ -461,9 +461,9 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-      
+
       <h2 className="text-xl font-semibold text-primary mb-4">Ações Rápidas</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Link
           to="/owners/new"
@@ -475,7 +475,7 @@ const Dashboard = () => {
           <h3 className="font-semibold text-gray-800 mb-2">Novo Proprietário</h3>
           <p className="text-gray-600 text-sm">Cadastrar um novo proprietário no sistema</p>
         </Link>
-        
+
         <Link
           to="/lessees/new"
           className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center text-center"
@@ -486,7 +486,7 @@ const Dashboard = () => {
           <h3 className="font-semibold text-gray-800 mb-2">Novo Inquilino</h3>
           <p className="text-gray-600 text-sm">Cadastrar um novo inquilino no sistema</p>
         </Link>
-        
+
         <Link
           to="/real-estates/new"
           className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center text-center"
@@ -497,7 +497,7 @@ const Dashboard = () => {
           <h3 className="font-semibold text-gray-800 mb-2">Novo Imóvel</h3>
           <p className="text-gray-600 text-sm">Cadastrar um novo imóvel no sistema</p>
         </Link>
-        
+
         <Link
           to="/contracts/new"
           className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col items-center text-center"
