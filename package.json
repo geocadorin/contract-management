@@ -1,6 +1,6 @@
 {
   "name": "sogrinha-contract-management",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "main": "dist-electron/main/index.js",
   "description": "Sistema de gerenciamento de contratos imobiliários",
   "author": "Sogrinha",

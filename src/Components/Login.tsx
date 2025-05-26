@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../SuperbaseConfig/supabaseClient';
 import logoImg from '../assets/sogrinha_logo.png';
+import katanaImg from '../assets/katana_desenho.png';
 
 type LoginProps = {
     onLogin: () => void;
@@ -12,6 +13,86 @@ const Login = ({ onLogin }: LoginProps) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+
+    // Easter egg states
+    const [logoClickCount, setLogoClickCount] = useState(0);
+    const [showKatana, setShowKatana] = useState(false);
+    const [konamiSequence, setKonamiSequence] = useState<string[]>([]);
+    const [showEasterEggMessage, setShowEasterEggMessage] = useState(false);
+
+    // Konami code sequence: ↑↑↓↓←→←→BA
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            const newSequence = [...konamiSequence, event.code].slice(-10);
+            setKonamiSequence(newSequence);
+
+            // Check if konami code is complete
+            if (newSequence.length === 10 && newSequence.every((key, index) => key === konamiCode[index])) {
+                triggerEasterEgg('Konami Code activated! 🎮');
+                setKonamiSequence([]);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [konamiSequence]);
+
+    const handleLogoClick = () => {
+        const newCount = logoClickCount + 1;
+        setLogoClickCount(newCount);
+
+        if (newCount === 7) {
+            triggerEasterEgg('Logo Master! 🐕');
+            setLogoClickCount(0);
+        } else if (newCount >= 3) {
+            // Show a hint after 3 clicks
+            setShowEasterEggMessage(true);
+            setTimeout(() => setShowEasterEggMessage(false), 2000);
+        }
+    };
+
+    const triggerEasterEgg = (message: string) => {
+        setShowKatana(true);
+        setShowEasterEggMessage(true);
+
+        // Criar confetes
+        const confettiContainer = document.createElement('div');
+        confettiContainer.className = 'fixed top-0 left-0 w-full h-full pointer-events-none z-50';
+        document.body.appendChild(confettiContainer);
+
+        const colors = ['#f39200', '#742851', '#0067B1']; // Amarelo, Rosa, Azul
+
+        for (let i = 0; i < 500; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confettiContainer.appendChild(confetti);
+        }
+
+        setTimeout(() => {
+            document.body.removeChild(confettiContainer);
+        }, 5000);
+
+        // Show celebration message
+        const celebration = document.createElement('div');
+        celebration.innerHTML = message;
+        celebration.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-full shadow-lg z-50 animate-bounce font-bold';
+        document.body.appendChild(celebration);
+
+        setTimeout(() => {
+            document.body.removeChild(celebration);
+            setShowEasterEggMessage(false);
+        }, 3000);
+
+        // Reset after 10 seconds
+        setTimeout(() => {
+            setShowKatana(false);
+        }, 10000);
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,18 +123,60 @@ const Login = ({ onLogin }: LoginProps) => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 relative">
+            <style>
+                {`
+                .confetti {
+                    position: absolute;
+                    width: 10px;
+                    height: 10px;
+                    background-color: #f39200;
+                    opacity: 0.7;
+                    animation: fall 3s linear infinite;
+                    border-radius: 50%;
+                }
+
+                @keyframes fall {
+                    0% {
+                        transform: translateY(-100vh) rotate(0deg);
+                    }
+                    100% {
+                        transform: translateY(100vh) rotate(720deg);
+                    }
+                }
+                `}
+            </style>
+            {/* Easter egg hint */}
+            {showEasterEggMessage && logoClickCount >= 3 && logoClickCount < 7 && (
+                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-yellow-900 px-4 py-2 rounded-lg shadow-lg z-50 animate-pulse">
+                    Continue clicando na logo... 🤔 ({7 - logoClickCount} restantes)
+                </div>
+            )}
+
             <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
                 <div className="flex flex-col items-center justify-center">
-                    <img
-                        src={logoImg}
-                        alt="Sogrinha Logo"
-                        className="w-32 h-auto mb-6"
-                    />
-                    <h1 className="text-3xl font-bold text-indigo-800">Bem-vindo</h1>
+                    <div
+                        onClick={handleLogoClick}
+                        className={`cursor-pointer transition-all duration-500 transform hover:scale-105 ${showKatana ? '' : ''} ${logoClickCount >= 3 ? 'animate-bounce' : ''}`}
+                        title={logoClickCount >= 3 ? `Cliques: ${logoClickCount}/7` : 'Sogrinha Logo'}
+                    >
+                        <img
+                            src={showKatana ? katanaImg : logoImg}
+                            alt={showKatana ? "Katana Desenho" : "Sogrinha Logo"}
+                            className={`w-32 h-auto mb-6 transition-all duration-500 ${showKatana ? 'scale-110' : ''}`}
+                        />
+                    </div>
+                    <h1 className={`text-3xl font-bold transition-all duration-500 ${showKatana ? 'text-pink-600 animate-pulse' : 'text-indigo-800'
+                        }`}>
+                        {showKatana ? 'Diga olá para a Katana! 🐕' : 'Bem-vindo'}
+                    </h1>
                     <p className="mt-2 text-sm text-gray-600">
-                        Faça login para acessar o sistema de gerenciamento de contratos
+                        {showKatana
+                            ? 'A cachorrinha mais fofa do mundo está aqui!'
+                            : 'Faça login para acessar o sistema de gerenciamento de contratos'
+                        }
                     </p>
+
                 </div>
 
                 {error && (
@@ -152,7 +275,10 @@ const Login = ({ onLogin }: LoginProps) => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200"
+                            className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-all duration-200 ${showKatana
+                                ? 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700'
+                                : 'bg-indigo-600 hover:bg-indigo-700'
+                                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
                         >
                             {loading ? (
                                 <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -166,7 +292,7 @@ const Login = ({ onLogin }: LoginProps) => {
                                     </svg>
                                 </span>
                             )}
-                            {loading ? 'Entrando...' : 'Entrar'}
+                            {loading ? 'Entrando...' : (showKatana ? 'Entrar com Katana! 🐕' : 'Entrar')}
                         </button>
                     </div>
                 </form>
@@ -175,10 +301,15 @@ const Login = ({ onLogin }: LoginProps) => {
                     <p className="text-sm text-gray-600">
                         &copy; {new Date().getFullYear()} Sogrinha. Todos os direitos reservados.
                     </p>
+                    {showKatana && (
+                        <p className="text-xs text-pink-500 mt-1 animate-pulse">
+                            🎉 Easter egg activated! Reset in 10s 🎉
+                        </p>
+                    )}
                 </div>
             </div>
         </div>
     );
 };
 
-export default Login; 
+export default Login;
