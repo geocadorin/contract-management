@@ -23,6 +23,7 @@ export interface Contract {
   extra_fees_details?: number;
   contract_signing_date?: string;
   contract_origin?: ContractOrigin;
+  security_deposit_amount?: number;
 
   created_at?: string;
   updated_at?: string;

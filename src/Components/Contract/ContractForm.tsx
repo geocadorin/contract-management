@@ -27,7 +27,8 @@ const initialContractState: Omit<Contract, 'id' | 'created_at' | 'updated_at'> =
   real_estate_id: '',
   extra_fees_details: 0,
   contract_signing_date: '',
-  contract_origin: 'Exclusivo'
+  contract_origin: 'Exclusivo',
+  security_deposit_amount: 0 // Adicionando o campo de calção
 };
 
 // Tipo para arquivos armazenados
@@ -719,6 +720,22 @@ const ContractForm = () => {
                   <option key={origin} value={origin}>{origin}</option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Calção (R$)
+              </label>
+              <input
+                type="number"
+                name="security_deposit_amount"
+                value={contract.security_deposit_amount || ''}
+                onChange={handleChange}
+                step="0.01"
+                min="0"
+                placeholder="0,00"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
+              />
             </div>
           </div>
 
