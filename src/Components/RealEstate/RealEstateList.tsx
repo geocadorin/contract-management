@@ -151,8 +151,7 @@ const RealEstateList = () => {
           <button
             onClick={handleExportToExcel}
             disabled={exportLoading || filteredRealEstates.length === 0}
-            className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${(exportLoading || filteredRealEstates.length === 0) ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+            className={`bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md flex items-center ${(exportLoading || filteredRealEstates.length === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {exportLoading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
@@ -297,11 +296,11 @@ const RealEstateList = () => {
                       <div className="text-sm text-gray-900">{realEstate.real_estate_kind}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                        ${realEstate.status_real_estate === 'Disponível' ? 'bg-green-100 text-green-800' : ''}
-                        ${realEstate.status_real_estate === 'Alugado' ? 'bg-blue-100 text-blue-800' : ''}
-                        ${realEstate.status_real_estate === 'Vendido' ? 'bg-purple-100 text-purple-800' : ''}
-                        ${realEstate.status_real_estate === 'Cancelado' ? 'bg-red-100 text-red-800' : ''}
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+            ${realEstate.status_real_estate === 'Disponível' ? 'bg-green-100 text-green-800' : ''}
+            ${realEstate.status_real_estate === 'Alugado' ? 'bg-blue-100 text-blue-800' : ''}
+            ${realEstate.status_real_estate === 'Vendido' ? 'bg-purple-100 text-purple-800' : ''}
+            ${realEstate.status_real_estate === 'Cancelado' ? 'bg-red-100 text-red-800' : ''}
                       `}>
                         {realEstate.status_real_estate}
                       </span>
@@ -325,57 +324,60 @@ const RealEstateList = () => {
                       />
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                ))
+                }
+              </tbody >
+            </table >
+          </div >
 
           {/* Paginação */}
-          {totalPages > 1 && (
-            <div className="flex justify-between items-center mt-4 bg-white p-4 rounded-lg shadow">
-              <div>
-                <span className="text-sm text-gray-700">
-                  Mostrando <span className="font-medium">{indexOfFirstItem + 1}</span> a <span className="font-medium">
-                    {Math.min(indexOfLastItem, filteredRealEstates.length)}
-                  </span> de <span className="font-medium">{filteredRealEstates.length}</span> resultados
-                </span>
+          {
+            totalPages > 1 && (
+              <div className="flex justify-between items-center mt-4 bg-white p-4 rounded-lg shadow">
+                <div>
+                  <span className="text-sm text-gray-700">
+                    Mostrando <span className="font-medium">{indexOfFirstItem + 1}</span> a <span className="font-medium">
+                      {Math.min(indexOfLastItem, filteredRealEstates.length)}
+                    </span> de <span className="font-medium">{filteredRealEstates.length}</span> resultados
+                  </span>
+                </div>
+
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
+                      } px-3 py-1 border rounded-md`}
+                  >
+                    <FiChevronLeft />
+                  </button>
+
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const pageNum = i + 1;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => goToPage(pageNum)}
+                        className={`${currentPage === pageNum ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
+                          } px-3 py-1 border rounded-md`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
+                      } px-3 py-1 border rounded-md`}
+                  >
+                    <FiChevronRight />
+                  </button>
+                </div>
               </div>
-
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => goToPage(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
-                    } px-3 py-1 border rounded-md`}
-                >
-                  <FiChevronLeft />
-                </button>
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  const pageNum = i + 1;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => goToPage(pageNum)}
-                      className={`${currentPage === pageNum ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
-                        } px-3 py-1 border rounded-md`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-
-                <button
-                  onClick={() => goToPage(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-gray-50'
-                    } px-3 py-1 border rounded-md`}
-                >
-                  <FiChevronRight />
-                </button>
-              </div>
-            </div>
-          )}
+            )
+          }
         </>
       ) : (
         <div className="bg-white p-8 rounded-lg shadow text-center">
@@ -403,7 +405,7 @@ const RealEstateList = () => {
           )}
         </div>
       )}
-    </div>
+    </div >
   );
 };
 
