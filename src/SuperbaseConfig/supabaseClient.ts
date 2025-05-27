@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
-import { SUPERBASE_KEY, SUPERBASE_URL } from './credentials';
+import { SUPERBASE_URL, SUPERBASE_KEY } from './credentials';
+
+
+
 // Usar credenciais diretamente
 const supabaseUrl = SUPERBASE_URL;
 const supabaseKey = SUPERBASE_KEY;

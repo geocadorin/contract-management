@@ -13,6 +13,7 @@ const TopBar = () => {
   // Função para logout
   const handleLogout = async () => {
     try {
+      console.log('Sessão atual:', session);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
